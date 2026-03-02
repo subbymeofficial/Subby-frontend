@@ -4,6 +4,7 @@ import { listingsService, type ListingSearchParams, type CreateListingData } fro
 import { applicationsService, type CreateApplicationData } from "@/services/applications.service";
 import { reviewsService, type CreateReviewData } from "@/services/reviews.service";
 import { adminService } from "@/services/admin.service";
+import { verificationAdminService } from "@/services/verification-admin.service";
 import { paymentsService } from "@/services/payments.service";
 import { categoriesService } from "@/services/categories.service";
 import { authService } from "@/services/auth.service";
@@ -159,6 +160,7 @@ export function useCreateApplication() {
       qc.invalidateQueries({ queryKey: ["my-applications"] });
       qc.invalidateQueries({ queryKey: ["listing-applications"] });
       qc.invalidateQueries({ queryKey: ["listings"] });
+      qc.invalidateQueries({ queryKey: ["my-listings"] });
     },
   });
 }
@@ -216,10 +218,10 @@ export function useDeleteReview() {
 }
 
 // ── Admin ──
-export function useAdminStats() {
+export function useAdminStats(params?: { from?: string; to?: string }) {
   return useQuery({
-    queryKey: ["admin-stats"],
-    queryFn: () => adminService.getStats(),
+    queryKey: ["admin-stats", params],
+    queryFn: () => adminService.getStats(params),
   });
 }
 
@@ -258,6 +260,15 @@ export function useSetUserVerified() {
       qc.invalidateQueries({ queryKey: ["admin-users"] });
       qc.invalidateQueries({ queryKey: ["admin-stats"] });
     },
+  });
+}
+
+// ── Verification (Admin) ──
+export function useVerificationDocsForUser(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["verification-docs", userId],
+    queryFn: () => verificationAdminService.getDocsForUser(userId!),
+    enabled: !!userId,
   });
 }
 
@@ -382,6 +393,12 @@ export function useDeleteProfileImage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["auth-user"] });
     },
+  });
+}
+
+export function useDeleteSelfAccount() {
+  return useMutation({
+    mutationFn: () => usersService.deleteSelf(),
   });
 }
 

@@ -1,26 +1,38 @@
-import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth, getApiError } from "@/context/AuthContext";
-import type { UserRole } from "@/lib/types";
 import { Navbar } from "@/components/Navbar";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("client");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
-  const redirectTo = searchParams.get("redirect");
+  // Check for error in URL (from Google OAuth redirect)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    if (error) {
+      toast({ 
+        title: "Sign In Failed", 
+        description: error, 
+        variant: "destructive",
+        duration: 6000,
+      });
+      // Clean up URL
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +40,23 @@ export default function Login() {
     try {
       await login(email, password);
       toast({ title: "Success", description: "Signed in successfully" });
-      navigate(redirectTo || (role === "admin" ? "/admin" : `/dashboard/${role}`));
+      
+      // Wait a bit for user state to update, then navigate
+      setTimeout(() => {
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+          const userData = JSON.parse(userStr);
+          console.log("User data:", userData); // Debug log
+          console.log("User role:", userData.role); // Debug log
+          
+          const redirectPath = userData.role === "admin" 
+            ? "/admin" 
+            : `/dashboard/${userData.role}`;
+          
+          console.log("Redirecting to:", redirectPath); // Debug log
+          navigate(redirectPath);
+        }
+      }, 100);
     } catch (error) {
       toast({ title: "Error", description: getApiError(error), variant: "destructive" });
     } finally {
@@ -37,7 +65,7 @@ export default function Login() {
   };
 
   const handleGoogleSignIn = () => {
-    loginWithGoogle(role);
+    loginWithGoogle("client");
   };
 
   return (
@@ -51,22 +79,6 @@ export default function Login() {
           </div>
 
           <div className="mt-8 space-y-4">
-            <div className="space-y-2">
-              <Label>Sign in as</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["client", "contractor", "admin"] as UserRole[]).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRole(r)}
-                    className={`rounded-lg border px-3 py-2 text-sm font-medium capitalize transition-all ${role === r ? "border-primary bg-accent text-primary" : "border-border text-muted-foreground hover:bg-secondary"}`}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <GoogleSignInButton
               onClick={handleGoogleSignIn}
               text="Continue with Google"
@@ -88,8 +100,31 @@ export default function Login() {
               <Input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
             </div>
             <div className="space-y-2">
-              <Label>Password</Label>
-              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
+              <div className="flex items-center justify-between">
+                <Label>Password</Label>
+                <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <Input 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="••••••••" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                  disabled={isLoading}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={isLoading}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

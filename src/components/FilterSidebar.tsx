@@ -10,6 +10,8 @@ interface Filters {
   location: string;
   category: string;
   minRating: string;
+  minHourlyRate: string;
+  maxHourlyRate: string;
   verified: boolean;
   available: boolean;
 }
@@ -27,7 +29,7 @@ export function FilterSidebar({ filters, onChange, mobileOpen, onClose }: Filter
     onChange({ ...filters, [key]: value });
   };
 
-  const clear = () => onChange({ location: "", category: "", minRating: "", verified: false, available: false });
+  const clear = () => onChange({ location: "", category: "", minRating: "", minHourlyRate: "", maxHourlyRate: "", verified: false, available: false });
 
   const content = (
     <div className="space-y-6">
@@ -66,6 +68,32 @@ export function FilterSidebar({ filters, onChange, mobileOpen, onClose }: Filter
             <SelectItem value="4.5">4.5+ Stars</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Hourly Rate Range ($/hr)</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Input 
+              type="number" 
+              placeholder="Min" 
+              value={filters.minHourlyRate} 
+              onChange={(e) => update("minHourlyRate", e.target.value)}
+              min="0"
+              step="5"
+            />
+          </div>
+          <div>
+            <Input 
+              type="number" 
+              placeholder="Max" 
+              value={filters.maxHourlyRate} 
+              onChange={(e) => update("maxHourlyRate", e.target.value)}
+              min="0"
+              step="5"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center justify-between">

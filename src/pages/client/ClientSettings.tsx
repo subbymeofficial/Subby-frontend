@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { clientNavItems } from "./ClientOverview";
 import { useAuth, getApiError } from "@/context/AuthContext";
-import { useUpdateProfile, useChangePassword } from "@/hooks/use-api";
+import { useUpdateProfile, useChangePassword, useDeleteSelfAccount } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, User as UserIcon, Lock } from "lucide-react";
 import { ProfileImageUpload } from "@/components/ProfileImageUpload";
@@ -15,6 +15,7 @@ export default function ClientSettings() {
   const { user, refreshUser } = useAuth();
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
+  const deleteSelf = useDeleteSelfAccount();
   const { toast } = useToast();
 
   const [form, setForm] = useState({
@@ -25,6 +26,7 @@ export default function ClientSettings() {
   });
 
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +60,23 @@ export default function ClientSettings() {
       setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (error) {
       toast({ title: "Error", description: getApiError(error), variant: "destructive" });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
+      return;
+    }
+    try {
+      setIsDeleting(true);
+      await deleteSelf.mutateAsync();
+      toast({ title: "Account deleted", description: "Your account has been deleted successfully." });
+      window.localStorage.clear();
+      window.location.href = "/";
+    } catch (error) {
+      toast({ title: "Error", description: getApiError(error), variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -124,6 +143,26 @@ export default function ClientSettings() {
             </div>
           </form>
         )}
+
+        {/* Danger Zone */}
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-6 card-shadow">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Lock size={18} /> Danger Zone
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Deleting your account will cancel your jobs and withdraw your applications. This action cannot be undone.
+          </p>
+          <Button
+            type="button"
+            variant="destructive"
+            className="mt-4"
+            onClick={handleDeleteAccount}
+            disabled={isDeleting}
+          >
+            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Delete Account
+          </Button>
+        </div>
       </div>
     </DashboardLayout>
   );

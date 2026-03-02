@@ -69,6 +69,7 @@ export function PromoCodeApply({ plan, onApplied, onRemove, appliedResult }: Pro
               <span className="font-medium">{appliedResult.code} applied</span>
             </div>
             <Button
+              type="button"
               size="sm"
               variant="ghost"
               className="h-8 px-2 text-muted-foreground hover:text-destructive"
@@ -101,9 +102,15 @@ export function PromoCodeApply({ plan, onApplied, onRemove, appliedResult }: Pro
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             placeholder="e.g. SUBBY10"
             className="uppercase flex-1"
-            onKeyDown={(e) => e.key === "Enter" && handleApply()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleApply();
+              }
+            }}
           />
           <Button
+            type="button"
             size="sm"
             variant="secondary"
             onClick={handleApply}

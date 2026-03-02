@@ -5,26 +5,42 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AppPagination } from "@/components/AppPagination";
 import { contractorNavItems } from "./ContractorOverview";
 import {
-  useListings, useCategories, useCreateApplication, useSubscriptionStatus,
+  useListings, useCategories, useCreateApplication, useSubscriptionStatus, useMyAvailability,
 } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
 import { getApiError } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
-  Search, MapPin, Loader2, DollarSign, Clock, ChevronDown, ChevronUp, Send, AlertTriangle,
+  Search, MapPin, Loader2, DollarSign, Clock, ChevronDown, ChevronUp, Send, AlertTriangle, CalendarIcon,
 } from "lucide-react";
 import type { Listing } from "@/lib/types";
+import type { DateRange } from "react-day-picker";
 
 const PAGE_SIZE = 8;
 
 export default function ContractorJobs() {
   const { toast } = useToast();
   const { data: subStatus } = useSubscriptionStatus();
+  const { data: availability } = useMyAvailability();
   const { data: categoriesData } = useCategories();
   const categories = categoriesData ?? [];
   const subActive = subStatus?.status === "active" || subStatus?.status === "trialing";
+
+  const unavailableDates = availability?.unavailableDates || [];
+  
+  const isDateUnavailable = (date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    const isUnavail = unavailableDates.includes(dateStr);
+    return isUnavail;
+  };
+
+  console.log("Unavailable dates:", unavailableDates);
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -44,9 +60,39 @@ export default function ContractorJobs() {
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  // Debug: Log listing IDs
+  console.log("Fetched listings:", listings.map(l => ({ id: l._id, title: l.title, idLength: l._id?.length })));
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [applyForm, setApplyForm] = useState({ coverLetter: "", proposedRate: "", proposedTimeline: "" });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const createApp = useCreateApplication();
+
+  // Check if selected range contains unavailable dates
+  const checkUnavailableInRange = () => {
+    if (!dateRange?.from) return null;
+    
+    const unavailableInRange = [];
+    
+    if (dateRange.to) {
+      // Date range selected
+      const start = new Date(dateRange.from);
+      const end = new Date(dateRange.to);
+      
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        if (isDateUnavailable(new Date(d))) {
+          unavailableInRange.push(format(new Date(d), "MMM dd"));
+        }
+      }
+    } else {
+      // Single date selected
+      if (isDateUnavailable(dateRange.from)) {
+        unavailableInRange.push(format(dateRange.from, "MMM dd"));
+      }
+    }
+    
+    return unavailableInRange.length > 0 ? unavailableInRange : null;
+  };
 
   const handleApply = async (listingId: string) => {
     if (!subActive) {
@@ -57,17 +103,87 @@ export default function ContractorJobs() {
       });
       return;
     }
+    
+    // Normalize and validate listing ID
+    const normalizedId = (listingId || '').toString().trim();
+    if (!normalizedId || normalizedId.length !== 24 || !/^[a-f0-9]{24}$/i.test(normalizedId)) {
+      console.error("Invalid listing ID:", listingId);
+      toast({
+        title: "Error",
+        description: "Invalid job listing ID. Please refresh the page and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate that no unavailable dates are in the selected range
+    // Check if user selected any dates
+    if (dateRange?.from) {
+      const hasUnavailableDates = [];
+      
+      console.log("Validating date range:", { from: dateRange.from, to: dateRange.to });
+      
+      // If there's a date range (from and to)
+      if (dateRange.to) {
+        const start = new Date(dateRange.from);
+        const end = new Date(dateRange.to);
+        
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const currentDate = new Date(d);
+          const isUnavail = isDateUnavailable(currentDate);
+          console.log(`Checking date ${format(currentDate, "yyyy-MM-dd")}: unavailable = ${isUnavail}`);
+          if (isUnavail) {
+            hasUnavailableDates.push(format(currentDate, "MMM dd, yyyy"));
+          }
+        }
+      } else {
+        // If only a single date is selected, check that date
+        const isUnavail = isDateUnavailable(dateRange.from);
+        console.log(`Checking single date ${format(dateRange.from, "yyyy-MM-dd")}: unavailable = ${isUnavail}`);
+        if (isUnavail) {
+          hasUnavailableDates.push(format(dateRange.from, "MMM dd, yyyy"));
+        }
+      }
+      
+      console.log("Unavailable dates found in selection:", hasUnavailableDates);
+      
+      if (hasUnavailableDates.length > 0) {
+        toast({
+          title: "Cannot Apply",
+          description: `Your selected timeline includes unavailable dates: ${hasUnavailableDates.join(", ")}. Please choose different dates.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
+    let timelineText = applyForm.proposedTimeline;
+    if (dateRange?.from && dateRange?.to) {
+      timelineText = `${format(dateRange.from, "MMM dd, yyyy")} - ${format(dateRange.to, "MMM dd, yyyy")}`;
+    } else if (dateRange?.from) {
+      timelineText = `Starting ${format(dateRange.from, "MMM dd, yyyy")}`;
+    }
+    
     try {
-      await createApp.mutateAsync({
-        listingId,
+      console.log("Submitting application with data:", {
+        listingId: normalizedId,
         coverLetter: applyForm.coverLetter,
         proposedRate: applyForm.proposedRate ? Number(applyForm.proposedRate) : undefined,
-        proposedTimeline: applyForm.proposedTimeline || undefined,
+        proposedTimeline: timelineText || undefined,
+      });
+      
+      await createApp.mutateAsync({
+        listingId: normalizedId,
+        coverLetter: applyForm.coverLetter,
+        proposedRate: applyForm.proposedRate ? Number(applyForm.proposedRate) : undefined,
+        proposedTimeline: timelineText || undefined,
       });
       toast({ title: "Applied!", description: "Your application has been submitted." });
       setExpandedId(null);
       setApplyForm({ coverLetter: "", proposedRate: "", proposedTimeline: "" });
+      setDateRange(undefined);
     } catch (error) {
+      console.error("Application error:", error);
       toast({ title: "Error", description: getApiError(error), variant: "destructive" });
     }
   };
@@ -207,18 +323,119 @@ export default function ContractorJobs() {
                         </div>
                         <div className="space-y-2">
                           <Label>Timeline</Label>
-                          <Input
-                            placeholder="e.g. 2 weeks"
-                            value={applyForm.proposedTimeline}
-                            onChange={(e) => setApplyForm({ ...applyForm, proposedTimeline: e.target.value })}
-                          />
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !dateRange && !applyForm.proposedTimeline && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {dateRange?.from ? (
+                                  dateRange.to ? (
+                                    <>
+                                      {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd, yyyy")}
+                                    </>
+                                  ) : (
+                                    format(dateRange.from, "MMM dd, yyyy")
+                                  )
+                                ) : applyForm.proposedTimeline ? (
+                                  applyForm.proposedTimeline
+                                ) : (
+                                  <span>Pick date range</span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                initialFocus
+                                mode="range"
+                                defaultMonth={dateRange?.from}
+                                selected={dateRange}
+                                onSelect={setDateRange}
+                                numberOfMonths={2}
+                                disabled={(date) => {
+                                  const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+                                  const isUnavailable = isDateUnavailable(date);
+                                  return isPast || isUnavailable;
+                                }}
+                                modifiers={{
+                                  unavailable: (date) => isDateUnavailable(date),
+                                }}
+                                modifiersStyles={{
+                                  unavailable: {
+                                    backgroundColor: '#fee2e2',
+                                    color: '#991b1b',
+                                    textDecoration: 'line-through',
+                                    opacity: 0.7,
+                                    cursor: 'not-allowed',
+                                  },
+                                }}
+                              />
+                              <div className="border-t p-3 space-y-2">
+                                {unavailableDates.length > 0 && (
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                                      <span className="inline-block w-3 h-3 bg-red-100 border border-red-300 rounded"></span>
+                                      {unavailableDates.length} unavailable date{unavailableDates.length !== 1 ? 's' : ''} (shown in red)
+                                    </span>
+                                  </div>
+                                )}
+                                <div className="flex gap-2">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={() => setDateRange(undefined)}
+                                  >
+                                    Clear
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={() => {
+                                      const prompt = window.prompt("Enter timeline manually (e.g., '2 weeks'):");
+                                      if (prompt) {
+                                        setApplyForm({ ...applyForm, proposedTimeline: prompt });
+                                        setDateRange(undefined);
+                                      }
+                                    }}
+                                  >
+                                    Manual Entry
+                                  </Button>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                       </div>
+                      
+                      {/* Warning for unavailable dates in range */}
+                      {checkUnavailableInRange() && (
+                        <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 flex items-start gap-2">
+                          <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                          <div className="text-sm">
+                            <p className="font-semibold text-destructive">Cannot apply with this timeline</p>
+                            <p className="text-muted-foreground mt-0.5">
+                              Your selected dates include unavailable days: <strong>{checkUnavailableInRange()?.join(", ")}</strong>. 
+                              Please select different dates.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="flex gap-2">
                         <Button
+                          type="button"
                           size="sm"
                           onClick={() => handleApply(listing._id)}
-                          disabled={createApp.isPending || !applyForm.coverLetter.trim()}
+                          disabled={createApp.isPending || !applyForm.coverLetter.trim() || !!checkUnavailableInRange()}
                         >
                           {createApp.isPending ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -227,7 +444,7 @@ export default function ContractorJobs() {
                           )}
                           Submit Application
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => setExpandedId(null)}>
+                        <Button type="button" size="sm" variant="outline" onClick={() => setExpandedId(null)}>
                           Cancel
                         </Button>
                       </div>

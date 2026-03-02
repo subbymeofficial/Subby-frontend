@@ -6,6 +6,8 @@ export interface ContractorSearchParams {
   location?: string;
   minRating?: number;
   isVerified?: boolean;
+  minHourlyRate?: number;
+  maxHourlyRate?: number;
   page?: number;
   limit?: number;
 }
@@ -58,5 +60,9 @@ export const usersService = {
   async deleteProfileImage(): Promise<User> {
     const res = await apiClient.delete("/users/profile-image");
     return unwrap(res);
+  },
+
+  async deleteSelf(): Promise<void> {
+    await apiClient.delete("/users/me");
   },
 };

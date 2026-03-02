@@ -28,38 +28,63 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const tokenRef = useRef<string | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   const connect = useCallback(() => {
     const token = localStorage.getItem("accessToken");
-    if (!token || socket?.connected) return;
+    if (!token || socketRef.current?.connected) return;
 
     tokenRef.current = token;
 
     const s = io(`${SOCKET_URL}/chat`, {
       auth: { token },
       transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
     });
 
-    s.on("connect", () => setIsConnected(true));
-    s.on("disconnect", () => setIsConnected(false));
-    s.on("error", (err: { message?: string }) =>
-      console.warn("[Socket]", err?.message || err)
-    );
+    s.on("connect", () => {
+      console.log("[Socket] Connected");
+      setIsConnected(true);
+    });
+    
+    s.on("disconnect", () => {
+      console.log("[Socket] Disconnected");
+      setIsConnected(false);
+    });
+    
+    s.on("connect_error", (err) => {
+      console.warn("[Socket] Connection error:", err?.message || err);
+    });
+    
+    s.on("error", (err: { message?: string }) => {
+      console.warn("[Socket] Error:", err?.message || err);
+    });
 
+    socketRef.current = s;
     setSocket(s);
-  }, [socket?.connected]);
+  }, []);
 
   const disconnect = useCallback(() => {
-    socket?.disconnect();
-    setSocket(null);
-    setIsConnected(false);
-  }, [socket]);
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setSocket(null);
+      setIsConnected(false);
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token) connect();
-    return () => disconnect();
-  }, [connect, disconnect]);
+    if (token && !socketRef.current) {
+      connect();
+    }
+    
+    return () => {
+      disconnect();
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   return (
     <SocketContext.Provider value={{ socket, isConnected, connect, disconnect }}>

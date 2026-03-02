@@ -11,7 +11,7 @@ import { Loader2, CheckCircle, XCircle, Star, ChevronDown, ChevronUp } from "luc
 import type { Listing, Application, User } from "@/lib/types";
 
 function ApplicationsForListing({ listing }: { listing: Listing }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState((listing.applicationCount ?? 0) > 0);
   const { data: applications, isLoading } = useListingApplications(expanded ? listing._id : undefined);
   const updateStatus = useUpdateApplicationStatus();
   const updateListing = useUpdateListing();

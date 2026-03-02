@@ -93,9 +93,10 @@ export default function ContractorSubscription() {
             </div>
           )}
           {currentPlan === "standard" ? (
-            <Button variant="outline" className="mt-6 w-full" disabled>Current Plan</Button>
+            <Button variant="outline" className="mt-6 w-full" disabled type="button">Current Plan</Button>
           ) : (
             <Button
+              type="button"
               className="mt-6 w-full"
               onClick={() => handleSubscribe("standard")}
               disabled={subscribe.isPending}
@@ -132,9 +133,10 @@ export default function ContractorSubscription() {
             </div>
           )}
           {currentPlan === "premium" ? (
-            <Button variant="outline" className="mt-6 w-full" disabled>Current Plan</Button>
+            <Button variant="outline" className="mt-6 w-full" disabled type="button">Current Plan</Button>
           ) : (
             <Button
+              type="button"
               className="mt-6 w-full"
               onClick={() => handleSubscribe("premium")}
               disabled={subscribe.isPending}
@@ -162,7 +164,7 @@ export default function ContractorSubscription() {
             {subStatus?.hasQualificationUpgrade ? (
               <Badge className="mt-1">Active</Badge>
             ) : (
-              <Button onClick={handleUpgrade} disabled={upgrade.isPending}>
+              <Button type="button" onClick={handleUpgrade} disabled={upgrade.isPending}>
                 {upgrade.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Upgrade
               </Button>

@@ -17,6 +17,8 @@ export default function Contractors() {
     location: searchParams.get("location") || "",
     category: searchParams.get("category") || "",
     minRating: "",
+    minHourlyRate: "",
+    maxHourlyRate: "",
     verified: false,
     available: false,
   });
@@ -28,6 +30,8 @@ export default function Contractors() {
     location: filters.location || undefined,
     minRating: filters.minRating && filters.minRating !== "any" ? parseFloat(filters.minRating) : undefined,
     isVerified: filters.verified || undefined,
+    minHourlyRate: filters.minHourlyRate && !isNaN(parseFloat(filters.minHourlyRate)) ? parseFloat(filters.minHourlyRate) : undefined,
+    maxHourlyRate: filters.maxHourlyRate && !isNaN(parseFloat(filters.maxHourlyRate)) ? parseFloat(filters.maxHourlyRate) : undefined,
     page,
     limit: PAGE_SIZE,
   });

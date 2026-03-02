@@ -7,13 +7,19 @@ export interface AdminStats {
   listings: { total: number; byStatus: Record<string, number> };
   subscriptions: { active: number; trialing: number; expired: number; total: number };
   applications: { total: number; byStatus: Record<string, number> };
-  revenue: { total: number; transactionCount: number };
+  revenue: {
+    total: number;
+    transactionCount: number;
+    byMonth?: { month: string; total: number }[];
+  };
+  jobsByCategory?: { category: string; count: number }[];
+  bookings?: { completed: number };
   reviews: { total: number };
 }
 
 export const adminService = {
-  async getStats(): Promise<AdminStats> {
-    const res = await apiClient.get("/admin/stats");
+  async getStats(params?: { from?: string; to?: string }): Promise<AdminStats> {
+    const res = await apiClient.get("/admin/stats", { params });
     return unwrap(res);
   },
 
@@ -28,8 +34,8 @@ export const adminService = {
   },
 
   async setUserVerified(id: string, isVerified: boolean): Promise<User> {
-    const res = await apiClient.patch(`/admin/users/${id}/verify`, { isVerified });
-    return unwrap(res);
+    // Deprecated: verification is managed via documents, not direct toggles.
+    throw new Error("Direct verification toggle is not supported. Use document-based verification.");
   },
 
   async setSubscription(id: string, status: string | null, plan: string | null): Promise<User> {

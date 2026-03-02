@@ -13,6 +13,8 @@ import Contractors from "./pages/Contractors";
 import ContractorProfile from "./pages/ContractorProfile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
 import Contact from "./pages/Contact";
@@ -74,6 +76,8 @@ const App = () => (
             <Route path="/contractors/:id" element={<ContractorProfile />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/payment/cancel" element={<PaymentCancel />} />
             <Route path="/contact" element={<Contact />} />

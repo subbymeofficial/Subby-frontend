@@ -27,8 +27,19 @@ export const authService = {
     return unwrap(res);
   },
 
-  getGoogleAuthUrl(role: string = "client"): string {
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const res = await apiClient.post("/auth/forgot-password", { email });
+    return unwrap(res);
+  },
+
+  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+    const res = await apiClient.post("/auth/reset-password", { token, password });
+    return unwrap(res);
+  },
+
+  getGoogleAuthUrl(role: string = "client", intent: "login" | "register" = "login"): string {
     const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/api/v1";
-    return `${baseUrl}/auth/google?role=${role}`;
+    return `${baseUrl}/auth/google?role=${role}&intent=${intent}`;
+    
   },
 };

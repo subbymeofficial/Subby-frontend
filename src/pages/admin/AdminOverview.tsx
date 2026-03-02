@@ -23,10 +23,34 @@ const navItems = [
 ];
 
 export default function AdminOverview() {
-  const { data: stats, isLoading } = useAdminStats();
+  const [from, setFrom] = useState<string>("");
+  const [to, setTo] = useState<string>("");
+  const { data: stats, isLoading } = useAdminStats({
+    from: from || undefined,
+    to: to || undefined,
+  });
 
   return (
     <AdminLayout navItems={navItems}>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <h1 className="text-xl font-semibold text-foreground">Admin Overview</h1>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Date range:</span>
+          <input
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+          />
+          <span className="text-muted-foreground">to</span>
+          <input
+            type="date"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+          />
+        </div>
+      </div>
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
       ) : (
@@ -107,6 +131,42 @@ export default function AdminOverview() {
                     <span className="font-semibold text-foreground">{stats?.users[role] ?? 0}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Revenue by Month */}
+            <div className="rounded-lg border bg-card p-6 card-shadow lg:col-span-1">
+              <h3 className="font-semibold text-foreground">Revenue by Month</h3>
+              <div className="mt-4 space-y-2">
+                {stats?.revenue.byMonth && stats.revenue.byMonth.length > 0 ? (
+                  stats.revenue.byMonth.map((m) => (
+                    <div key={m.month} className="flex items-center justify-between rounded bg-secondary p-3 text-sm">
+                      <span className="text-foreground">{m.month}</span>
+                      <span className="font-semibold text-foreground">
+                        ${(m.total / 100).toFixed(0)}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No revenue data.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Jobs by Category */}
+            <div className="rounded-lg border bg-card p-6 card-shadow lg:col-span-2">
+              <h3 className="font-semibold text-foreground">Jobs by Category</h3>
+              <div className="mt-4 space-y-2">
+                {stats?.jobsByCategory && stats.jobsByCategory.length > 0 ? (
+                  stats.jobsByCategory.map((c) => (
+                    <div key={c.category} className="flex items-center justify-between rounded bg-secondary p-3 text-sm">
+                      <span className="text-foreground">{c.category || "Uncategorized"}</span>
+                      <span className="font-semibold text-foreground">{c.count}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No category data.</p>
+                )}
               </div>
             </div>
           </div>

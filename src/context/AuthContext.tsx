@@ -93,11 +93,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginWithGoogle = (role: UserRole) => {
-    window.location.href = authService.getGoogleAuthUrl(role);
+    window.location.href = authService.getGoogleAuthUrl(role, 'login');
   };
 
   const registerWithGoogle = (role: UserRole) => {
-    window.location.href = authService.getGoogleAuthUrl(role);
+    window.location.href = authService.getGoogleAuthUrl(role, 'register');
   };
 
   const logout = () => {

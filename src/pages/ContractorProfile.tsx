@@ -197,14 +197,6 @@ export default function ContractorProfile() {
 
           <div className="space-y-6">
             <section className="rounded-lg border bg-card p-6 card-shadow">
-              <h3 className="font-semibold text-foreground">Contact Info</h3>
-              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                {contractor.phone && <li>Phone: {contractor.phone}</li>}
-                <li>Email: {contractor.email}</li>
-              </ul>
-            </section>
-
-            <section className="rounded-lg border bg-card p-6 card-shadow">
               <h3 className="flex items-center gap-2 font-semibold text-foreground"><Calendar size={16} /> Member Since</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {contractor.createdAt ? new Date(contractor.createdAt).toLocaleDateString("en-AU", { year: "numeric", month: "long" }) : "N/A"}

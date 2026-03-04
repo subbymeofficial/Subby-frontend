@@ -22,9 +22,7 @@ export const messagesService = {
     if (data.text) formData.append("text", data.text);
     attachments?.forEach((f) => formData.append("attachments", f));
 
-    const res = await apiClient.post("/messages", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const res = await apiClient.post("/messages", formData);
     return unwrap(res);
   },
 

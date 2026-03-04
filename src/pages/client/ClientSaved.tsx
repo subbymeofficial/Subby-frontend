@@ -1,15 +1,18 @@
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { ContractorCard } from "@/components/ContractorCard";
-import { useSavedContractors, useUnsaveContractor } from "@/hooks/use-api";
+import { useSavedContractors, useUnsaveContractor, useCreateConversation } from "@/hooks/use-api";
 import { clientNavItems } from "./ClientOverview";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { getApiError } from "@/context/AuthContext";
-import { Loader2, HeartOff } from "lucide-react";
+import { Loader2, HeartOff, MessageSquare, Heart } from "lucide-react";
 
 export default function ClientSaved() {
+  const navigate = useNavigate();
   const { data: contractors, isLoading } = useSavedContractors();
   const unsave = useUnsaveContractor();
+  const createConversation = useCreateConversation();
   const { toast } = useToast();
 
   const handleUnsave = async (id: string) => {
@@ -18,6 +21,15 @@ export default function ClientSaved() {
       toast({ title: "Removed", description: "Contractor removed from saved list" });
     } catch (error) {
       toast({ title: "Error", description: getApiError(error), variant: "destructive" });
+    }
+  };
+
+  const handleMessage = async (id: string) => {
+    try {
+      const conv = await createConversation.mutateAsync({ participantId: id });
+      navigate(`/messages?c=${conv._id}`);
+    } catch (e) {
+      toast({ title: "Could not start chat", description: getApiError(e), variant: "destructive" });
     }
   };
 
@@ -36,17 +48,25 @@ export default function ClientSaved() {
       ) : (
         <div className="grid gap-4">
           {contractors.map((c) => (
-            <div key={c._id} className="relative">
+            <div key={c._id}>
               <ContractorCard contractor={c} />
-              <Button
-                size="sm"
-                variant="destructive"
-                className="absolute top-3 right-3"
-                onClick={() => handleUnsave(c._id)}
-                disabled={unsave.isPending}
-              >
-                <HeartOff size={14} className="mr-1" /> Unsave
-              </Button>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleMessage(c._id)}
+                  disabled={createConversation.isPending}
+                >
+                  <MessageSquare size={14} className="mr-2" /> Message
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleUnsave(c._id)}
+                  disabled={unsave.isPending}
+                >
+                  <Heart size={14} className="mr-2 fill-current" /> Unsave
+                </Button>
+              </div>
             </div>
           ))}
         </div>

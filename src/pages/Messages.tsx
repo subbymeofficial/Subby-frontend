@@ -146,7 +146,8 @@ function ChatPanel({
   onBack: () => void;
 }) {
   const [text, setText] = useState("");
-  const [fileInput, setFileInput] = useState<HTMLInputElement | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: msgData, refetch } = useMessages(conversationId);
   const sendMessage = useSendMessage();
   const markRead = useMarkMessagesRead();
@@ -185,16 +186,16 @@ function ChatPanel({
 
   const handleSend = async () => {
     const trimmed = text.trim();
-    const files = fileInput?.files ? Array.from(fileInput.files) : [];
-    if (!trimmed && files.length === 0) return;
+    if (!trimmed && selectedFiles.length === 0) return;
     try {
       await sendMessage.mutateAsync({
         conversationId,
         text: trimmed || undefined,
-        attachments: files.length > 0 ? files : undefined,
+        attachments: selectedFiles.length > 0 ? selectedFiles : undefined,
       });
       setText("");
-      if (fileInput) fileInput.value = "";
+      setSelectedFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (e) {
       toast({
         title: "Failed to send",
@@ -286,21 +287,34 @@ function ChatPanel({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex gap-2 border-t p-3">
-        <input
-          ref={setFileInput}
-          type="file"
-          multiple
-          accept="image/*,.pdf"
-          className="hidden"
-        />
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => fileInput?.click()}
-        >
-          <Paperclip size={18} />
-        </Button>
+      <div className="flex flex-col gap-2 border-t p-3">
+        {selectedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+            {selectedFiles.map((f, i) => (
+              <span key={i} className="rounded bg-muted px-2 py-0.5">
+                {f.name}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,.pdf"
+            className="hidden"
+            onChange={(e) =>
+              setSelectedFiles(Array.from(e.target.files || []))
+            }
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Paperclip size={18} />
+          </Button>
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -316,7 +330,10 @@ function ChatPanel({
         />
         <Button
           onClick={handleSend}
-          disabled={sendMessage.isPending || (!text.trim() && !fileInput?.files?.length)}
+          disabled={
+            sendMessage.isPending ||
+            (!text.trim() && selectedFiles.length === 0)
+          }
         >
           {sendMessage.isPending ? (
             <Loader2 size={18} className="animate-spin" />
@@ -324,6 +341,7 @@ function ChatPanel({
             <Send size={18} />
           )}
         </Button>
+        </div>
       </div>
     </>
   );

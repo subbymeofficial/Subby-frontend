@@ -1,4 +1,4 @@
-import { LayoutDashboard, Briefcase, Users, Heart, Star, CreditCard, Settings, FileText } from "lucide-react";
+import { LayoutDashboard, Briefcase, Heart, Star, Settings, FileText } from "lucide-react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { StatsCard } from "@/components/StatsCard";
 import { useMyListings, useSavedContractors, useMyTransactions } from "@/hooks/use-api";
@@ -10,7 +10,6 @@ const navItems = [
   { label: "Overview", path: "/dashboard/client", icon: LayoutDashboard },
   { label: "My Listings", path: "/dashboard/client/listings", icon: Briefcase },
   { label: "Applications", path: "/dashboard/client/applications", icon: FileText },
-  { label: "Payments", path: "/dashboard/client/payments", icon: CreditCard },
   { label: "Saved Contractors", path: "/dashboard/client/saved", icon: Heart },
   { label: "My Reviews", path: "/dashboard/client/reviews", icon: Star },
   { label: "Settings", path: "/dashboard/client/settings", icon: Settings },

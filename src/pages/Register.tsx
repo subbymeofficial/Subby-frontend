@@ -45,7 +45,7 @@ export default function Register() {
       toast({ title: "Success", description: "Account created successfully" });
       navigate(`/dashboard/${role}`);
     } catch (error) {
-      toast({ title: "Error", description: getApiError(error), variant: "destructive" });
+      toast({ title: "Sign Up Failed", description: getApiError(error), variant: "destructive" });
     } finally {
       setIsLoading(false);
     }

@@ -42,7 +42,7 @@ export function FilterSidebar({ filters, onChange, mobileOpen, onClose }: Filter
 
       <div className="space-y-2">
         <Label>Location</Label>
-        <Input placeholder="e.g. Sydney, NSW" value={filters.location} onChange={(e) => update("location", e.target.value)} />
+        <Input placeholder="e.g. Texas,USA" value={filters.location} onChange={(e) => update("location", e.target.value)} />
       </div>
 
       <div className="space-y-2">

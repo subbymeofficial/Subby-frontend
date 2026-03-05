@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import { adminNavItems } from "./AdminOverview";
+import { ProfileImageUpload } from "@/components/ProfileImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -53,10 +54,13 @@ export default function AdminSettings() {
 
         <div className="rounded-lg border bg-card p-6 card-shadow">
           <h3 className="font-semibold text-foreground">Account Information</h3>
-          <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <p><span className="font-medium text-foreground">Name:</span> {user?.name}</p>
-            <p><span className="font-medium text-foreground">Email:</span> {user?.email}</p>
-            <p><span className="font-medium text-foreground">Role:</span> Admin</p>
+          <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-start">
+            <ProfileImageUpload />
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p><span className="font-medium text-foreground">Name:</span> {user?.name}</p>
+              <p><span className="font-medium text-foreground">Email:</span> {user?.email}</p>
+              <p><span className="font-medium text-foreground">Role:</span> Admin</p>
+            </div>
           </div>
         </div>
 

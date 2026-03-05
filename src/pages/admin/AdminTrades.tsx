@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { getApiError } from "@/context/AuthContext";
 import { Plus, Pencil, Trash2, Loader2, X, Check } from "lucide-react";
@@ -31,6 +32,8 @@ export default function AdminTrades() {
   const [editName, setEditName] = useState("");
   const [addSubTradeId, setAddSubTradeId] = useState<string | null>(null);
   const [newSubName, setNewSubName] = useState("");
+  const [globalSubParentId, setGlobalSubParentId] = useState<string>("");
+  const [globalSubName, setGlobalSubName] = useState("");
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +81,19 @@ export default function AdminTrades() {
     }
   };
 
+  const handleAddSubFromDropdown = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!globalSubParentId || !globalSubName.trim()) return;
+    try {
+      await addSub.mutateAsync({ tradeId: globalSubParentId, name: globalSubName.trim() });
+      toast({ title: "Subcategory added" });
+      setGlobalSubParentId("");
+      setGlobalSubName("");
+    } catch (error) {
+      toast({ title: "Error", description: getApiError(error), variant: "destructive" });
+    }
+  };
+
   const handleRemoveSub = async (tradeId: string, slug: string) => {
     try {
       await removeSub.mutateAsync({ tradeId, slug });
@@ -112,6 +128,50 @@ export default function AdminTrades() {
             <div className="flex items-end">
               <Button type="submit" disabled={createTrade.isPending}>
                 {createTrade.isPending ? <Loader2 size={16} className="animate-spin" /> : "Add"}
+              </Button>
+            </div>
+          </div>
+        </form>
+      )}
+
+      {trades && trades.length > 0 && (
+        <form
+          onSubmit={handleAddSubFromDropdown}
+          className="mb-6 rounded-lg border bg-card p-5 card-shadow"
+        >
+          <Label className="mb-2 block">Add Subcategory</Label>
+          <p className="text-sm text-muted-foreground mb-3">Select a parent trade, then enter the subcategory name.</p>
+          <div className="flex gap-3 flex-wrap">
+            <div className="min-w-[180px]">
+              <Label className="text-xs text-muted-foreground">Parent Trade</Label>
+              <Select value={globalSubParentId || undefined} onValueChange={setGlobalSubParentId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent trade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {trades.map((t) => (
+                    <SelectItem key={t._id} value={t._id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1 min-w-[160px]">
+              <Label className="text-xs text-muted-foreground">Subcategory Name</Label>
+              <Input
+                placeholder="e.g. Leak Repair"
+                value={globalSubName}
+                onChange={(e) => setGlobalSubName(e.target.value)}
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                type="submit"
+                size="sm"
+                disabled={addSub.isPending || !globalSubParentId || !globalSubName.trim()}
+              >
+                {addSub.isPending ? <Loader2 size={16} className="animate-spin" /> : "Add Subcategory"}
               </Button>
             </div>
           </div>

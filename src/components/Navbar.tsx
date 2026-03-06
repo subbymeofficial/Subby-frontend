@@ -20,9 +20,9 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-      <nav className="container-main flex h-16 items-center justify-between">
+      <nav className="container-main flex min-h-16 items-center justify-between py-4">
         <Link to="/" className="flex items-center">
-          <img src="/subbyme-logo.png" alt="SubbyMe" className="h-9 object-contain" />
+          <img src="/subbyme-logo.png" alt="SubbyMe" className="h-12 sm:h-14 md:h-16 lg:h-20 object-contain max-h-24 w-auto" />
         </Link>
 
         <div className="hidden items-center gap-6 md:flex">

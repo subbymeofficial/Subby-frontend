@@ -6,9 +6,8 @@ export function Footer() {
       <div className="container-main py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">S</div>
-              <span className="text-lg font-bold text-foreground">SubbyMe</span>
+            <div className="flex items-center mb-3">
+              <img src="/subbyme-logo-footer.png" alt="SubbyMe" className="h-14 sm:h-16 md:h-20 lg:h-24 object-contain w-auto max-w-[280px]" />
             </div>
             <p className="text-sm text-muted-foreground">Skilled Help, On Demand.</p>
           </div>

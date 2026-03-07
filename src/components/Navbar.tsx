@@ -19,7 +19,7 @@ export function Navbar() {
   const dashboardPath = user?.role === "admin" ? "/admin" : `/dashboard/${user?.role}`;
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+    <header className="sticky top-0 z-40 border-b bg-[#D6E8FF] backdrop-blur">
       <nav className="container-main flex min-h-16 items-center justify-between py-4">
         <Link to="/" className="flex items-center">
           <img src="/subbyme-logo.png" alt="SubbyMe" className="h-12 sm:h-14 md:h-16 lg:h-20 object-contain max-h-24 w-auto" />
@@ -30,7 +30,7 @@ export function Navbar() {
             <Link
               key={l.path}
               to={l.path}
-              className={`text-sm font-medium transition-colors hover:text-primary ${location.pathname === l.path ? "text-primary" : "text-muted-foreground"}`}
+              className={`text-sm font-medium transition-colors text-black hover:text-primary ${location.pathname === l.path ? "text-primary font-semibold" : ""}`}
             >
               {l.label}
             </Link>
@@ -47,14 +47,14 @@ export function Navbar() {
               <Button asChild variant="ghost" size="sm">
                 <Link to={dashboardPath}><User size={16} className="mr-1" /> Dashboard</Link>
               </Button>
-              <span className="text-sm text-muted-foreground">{user.name}</span>
+              <span className="text-sm text-black">{user.name}</span>
               <Button variant="outline" size="sm" onClick={logout}>
                 <LogOut size={16} className="mr-1" /> Logout
               </Button>
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm"><Link to="/login">Log In</Link></Button>
+              <Button asChild variant="ghost" size="sm" className="text-black hover:text-primary"><Link to="/login">Log In</Link></Button>
               <Button asChild size="sm"><Link to="/register">Sign Up</Link></Button>
             </>
           )}
@@ -66,21 +66,21 @@ export function Navbar() {
       </nav>
 
       {mobileOpen && (
-        <div className="border-t bg-card p-4 md:hidden animate-fade-in">
+        <div className="border-t bg-[#D6E8FF] p-4 md:hidden animate-fade-in">
           <div className="flex flex-col gap-3">
             {navLinks.map((l) => (
               <Link key={l.path} to={l.path} onClick={() => setMobileOpen(false)}
-                className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${location.pathname === l.path ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary"}`}>
+                className={`text-sm font-medium px-3 py-2 rounded-md transition-colors text-black ${location.pathname === l.path ? "bg-primary/20 text-primary font-semibold" : "hover:bg-primary/10"}`}>
                 {l.label}
               </Link>
             ))}
             {isAuthenticated ? (
               <>
-                <Link to="/messages" onClick={() => setMobileOpen(false)} className="text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary flex items-center gap-2">
+                <Link to="/messages" onClick={() => setMobileOpen(false)} className="text-sm font-medium px-3 py-2 rounded-md text-black hover:bg-primary/10 flex items-center gap-2">
                   <MessageSquare size={16} /> Messages
                 </Link>
                 <div className="px-3 py-2"><NotificationDropdown /></div>
-                <Link to={dashboardPath} onClick={() => setMobileOpen(false)} className="text-sm font-medium px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary">Dashboard</Link>
+                <Link to={dashboardPath} onClick={() => setMobileOpen(false)} className="text-sm font-medium px-3 py-2 rounded-md text-black hover:bg-primary/10">Dashboard</Link>
                 <Button variant="outline" size="sm" onClick={() => { logout(); setMobileOpen(false); }}>Logout</Button>
               </>
             ) : (

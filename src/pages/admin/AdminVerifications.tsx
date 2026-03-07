@@ -150,13 +150,18 @@ export default function AdminVerifications() {
                   const doc = docs.find((d) => d.type === type);
                   return (
                     <div key={type} className="flex items-center justify-between rounded bg-secondary p-3 text-sm">
-                      <div>
+                      <div className="space-y-1">
                         <p className="font-medium text-foreground capitalize">
                           {type === "id" ? "ID" : type === "abn" ? "ABN" : type === "insurance" ? "Insurance" : "Qualification"}
                         </p>
-                        <Badge variant={variant} className="mt-1 text-xs">
+                        <Badge variant={variant} className="text-xs">
                           {label}
                         </Badge>
+                        {doc?.expiryDate && (
+                          <p className="text-xs text-muted-foreground">
+                            Expiry date: {new Date(doc.expiryDate).toLocaleDateString()}
+                          </p>
+                        )}
                       </div>
                       {doc && (
                         <div className="flex items-center gap-2">

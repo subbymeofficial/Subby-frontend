@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,12 @@ export function VerificationDocumentsUpload() {
   const { toast } = useToast();
   const [viewDoc, setViewDoc] = useState<{ url: string; title: string } | null>(null);
   const [loadingDoc, setLoadingDoc] = useState(false);
+  const [expiryDates, setExpiryDates] = useState<Record<VerificationDocumentType, string>>({
+    id: "",
+    abn: "",
+    insurance: "",
+    qualification: "",
+  });
   const fileRefs = useRef<Record<VerificationDocumentType, HTMLInputElement | null>>({
     id: null,
     abn: null,
@@ -43,6 +50,17 @@ export function VerificationDocumentsUpload() {
   const handleUpload = async (type: VerificationDocumentType, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const expiryDate = expiryDates[type];
+    if (!expiryDate) {
+      toast({
+        title: "Expiry date required",
+        description: "Please select an expiry date for this document before uploading.",
+        variant: "destructive",
+      });
+      e.target.value = "";
+      return;
+    }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       toast({
@@ -62,7 +80,7 @@ export function VerificationDocumentsUpload() {
     }
 
     try {
-      await upload.mutateAsync({ type, file });
+      await upload.mutateAsync({ type, file, expiryDate });
       toast({ title: "Uploaded", description: "Document submitted for review." });
     } catch (error) {
       toast({ title: "Upload failed", description: getApiError(error), variant: "destructive" });
@@ -105,9 +123,30 @@ export function VerificationDocumentsUpload() {
                 key={type}
                 className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-secondary/50 p-4"
               >
-                <div>
-                  <p className="font-medium text-foreground">{label}</p>
-                  <p className="text-xs text-muted-foreground">{description}</p>
+                <div className="space-y-2">
+                  <div>
+                    <p className="font-medium text-foreground">{label}</p>
+                    <p className="text-xs text-muted-foreground">{description}</p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Expiry date
+                    </label>
+                    <Input
+                      type="date"
+                      className="h-8 w-[180px]"
+                      value={expiryDates[type] || ""}
+                      onChange={(ev) =>
+                        setExpiryDates((prev) => ({ ...prev, [type]: ev.target.value }))
+                      }
+                    />
+                    {doc?.expiryDate && (
+                      <p className="text-[11px] text-muted-foreground">
+                        Current expiry:{" "}
+                        {new Date(doc.expiryDate).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
                   {doc && (
                     <div className="mt-2 flex items-center gap-2">
                       {getStatusBadge(doc)}
@@ -136,7 +175,7 @@ export function VerificationDocumentsUpload() {
                     </div>
                   )}
                 </div>
-                <div>
+                <div className="flex items-center">
                   <input
                     ref={(el) => { fileRefs.current[type] = el; }}
                     type="file"

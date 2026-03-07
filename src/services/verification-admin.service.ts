@@ -9,6 +9,7 @@ export interface VerificationDocument {
   type: VerificationDocumentType;
   documentUrl: string;
   status: VerificationDocumentStatus;
+  expiryDate?: string | null;
   reviewedBy?: string | null;
   reviewedAt?: string | null;
   rejectionReason?: string | null;

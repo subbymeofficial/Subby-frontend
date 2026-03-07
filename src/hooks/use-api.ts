@@ -275,8 +275,8 @@ export function useMyVerificationDocs() {
 export function useUploadVerificationDoc() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ type, file }: { type: import("@/services/verification.service").VerificationDocumentType; file: File }) =>
-      verificationService.uploadDocument(type, file),
+    mutationFn: ({ type, file, expiryDate }: { type: import("@/services/verification.service").VerificationDocumentType; file: File; expiryDate: string }) =>
+      verificationService.uploadDocument(type, file, expiryDate),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-verification-docs"] });
       qc.invalidateQueries({ queryKey: ["auth-user"] });

@@ -9,6 +9,7 @@ export interface VerificationDocument {
   type: VerificationDocumentType;
   documentUrl: string;
   status: VerificationDocumentStatus;
+   expiryDate?: string | null;
   reviewedBy?: string | null;
   reviewedAt?: string | null;
   rejectionReason?: string | null;
@@ -29,10 +30,11 @@ export const verificationService = {
     return { blob: res.data, mimeType };
   },
 
-  async uploadDocument(type: VerificationDocumentType, file: File): Promise<VerificationDocument> {
+  async uploadDocument(type: VerificationDocumentType, file: File, expiryDate: string): Promise<VerificationDocument> {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", type);
+    formData.append("expiryDate", expiryDate);
     const res = await apiClient.post("/verification/upload", formData);
     return unwrap(res);
   },

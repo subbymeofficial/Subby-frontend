@@ -330,10 +330,39 @@ export function useAdminTransactions(params: { page?: number; limit?: number; ty
   });
 }
 
-export function useAdminReviews(params: { page?: number; limit?: number } = {}) {
+export function useAdminReviews(params: { page?: number; limit?: number; status?: string } = {}) {
   return useQuery({
     queryKey: ["admin-reviews", params],
     queryFn: () => adminService.getReviews(params),
+  });
+}
+
+export function useAdminApproveReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminService.approveReview(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+    },
+  });
+}
+
+export function useAdminRejectReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminService.rejectReview(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+    },
+  });
+}
+
+export function useFeaturedReviews(limit = 8) {
+  return useQuery({
+    queryKey: ["featured-reviews", limit],
+    queryFn: () => reviewsService.getFeatured(limit),
   });
 }
 

@@ -25,6 +25,11 @@ export const reviewsService = {
     return unwrap(res);
   },
 
+  async getFeatured(limit = 8): Promise<Review[]> {
+    const res = await apiClient.get("/reviews/featured", { params: { limit } });
+    return unwrap(res);
+  },
+
   async getById(id: string): Promise<Review> {
     const res = await apiClient.get(`/reviews/${id}`);
     return unwrap(res);

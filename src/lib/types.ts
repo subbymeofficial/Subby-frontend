@@ -81,6 +81,7 @@ export interface Review {
   rating: number;
   comment: string;
   type: "client_to_contractor" | "contractor_to_client";
+  status?: "pending" | "approved" | "rejected";
   createdAt?: string;
   updatedAt?: string;
 }

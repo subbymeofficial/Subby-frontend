@@ -62,8 +62,18 @@ export const adminService = {
     return unwrap(res);
   },
 
-  async getReviews(params: { page?: number; limit?: number } = {}): Promise<{ reviews: Review[]; total: number; page: number; limit: number }> {
+  async getReviews(params: { page?: number; limit?: number; status?: string } = {}): Promise<{ reviews: Review[]; total: number; page: number; limit: number }> {
     const res = await apiClient.get("/admin/reviews", { params });
+    return unwrap(res);
+  },
+
+  async approveReview(id: string): Promise<Review> {
+    const res = await apiClient.patch(`/admin/reviews/${id}/approve`);
+    return unwrap(res);
+  },
+
+  async rejectReview(id: string): Promise<Review> {
+    const res = await apiClient.patch(`/admin/reviews/${id}/reject`);
     return unwrap(res);
   },
 

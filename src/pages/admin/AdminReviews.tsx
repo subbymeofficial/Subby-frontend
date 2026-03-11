@@ -5,18 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AppPagination } from "@/components/AppPagination";
 import { RatingStars } from "@/components/RatingStars";
-import { useAdminReviews, useAdminDeleteReview } from "@/hooks/use-api";
+import { useAdminReviews, useAdminDeleteReview, useAdminApproveReview, useAdminRejectReview } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
 import { getApiError } from "@/context/AuthContext";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, ShieldCheck, ShieldX } from "lucide-react";
 import type { User, Listing } from "@/lib/types";
 
 const PAGE_SIZE = 20;
 
+type ReviewStatusFilter = "all" | "pending" | "approved" | "rejected";
+
 export default function AdminReviews() {
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useAdminReviews({ page, limit: PAGE_SIZE });
+  const [statusFilter, setStatusFilter] = useState<ReviewStatusFilter>("pending");
+  const { data, isLoading } = useAdminReviews({ page, limit: PAGE_SIZE, status: statusFilter === "all" ? undefined : statusFilter });
   const deleteReview = useAdminDeleteReview();
+  const approveReview = useAdminApproveReview();
+  const rejectReview = useAdminRejectReview();
   const { toast } = useToast();
 
   const reviews = data?.reviews ?? [];
@@ -35,7 +40,21 @@ export default function AdminReviews() {
 
   return (
     <AdminLayout navItems={adminNavItems}>
-      <h2 className="mb-4 text-lg font-semibold text-foreground">Reviews Moderation ({total})</h2>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold text-foreground">Reviews Moderation ({total})</h2>
+        <div className="flex gap-2">
+          {(["pending", "approved", "rejected", "all"] as const).map((s) => (
+            <Button
+              key={s}
+              size="sm"
+              variant={statusFilter === s ? "default" : "outline"}
+              onClick={() => { setStatusFilter(s); setPage(1); }}
+            >
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
@@ -67,23 +86,55 @@ export default function AdminReviews() {
                           Job: {typeof listing === "object" && "title" in listing ? listing.title : "—"}
                         </p>
                       )}
-                      <div className="mt-1 flex items-center gap-2">
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
                         <RatingStars rating={r.rating} size={14} />
+                        <Badge
+                          variant={
+                            r.status === "approved" ? "default" : r.status === "rejected" ? "destructive" : "secondary"
+                          }
+                          className="text-xs"
+                        >
+                          {r.status || "approved"}
+                        </Badge>
                         <span className="text-xs text-muted-foreground">
                           {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ""}
                         </span>
                       </div>
                       <p className="mt-2 text-sm text-muted-foreground">{r.comment}</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(r._id)}
-                      disabled={deleteReview.isPending}
-                      title="Delete review"
-                    >
-                      <Trash2 size={16} className="text-destructive" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      {r.status === "pending" && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => approveReview.mutate(r._id)}
+                            disabled={approveReview.isPending}
+                            title="Approve"
+                          >
+                            <ShieldCheck size={14} className="mr-1" /> Approve
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => rejectReview.mutate(r._id)}
+                            disabled={rejectReview.isPending}
+                            title="Reject"
+                          >
+                            <ShieldX size={14} className="mr-1" /> Reject
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(r._id)}
+                        disabled={deleteReview.isPending}
+                        title="Delete review"
+                      >
+                        <Trash2 size={16} className="text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               );

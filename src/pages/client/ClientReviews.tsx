@@ -46,7 +46,7 @@ export default function ClientReviews() {
         comment: reviewForm.comment,
         type: "client_to_contractor",
       });
-      toast({ title: "Success", description: "Review submitted" });
+      toast({ title: "Success", description: "Review submitted. It will be published after admin approval." });
       setShowForm(false);
       setReviewForm({ listingId: "", revieweeId: "", rating: "5", comment: "" });
     } catch (error) {

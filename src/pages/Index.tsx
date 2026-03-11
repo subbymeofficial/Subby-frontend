@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { HowItWorks } from "@/components/HowItWorks";
 import { FAQ } from "@/components/FAQ";
 import { MissionSection } from "@/components/MissionSection";
+import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { useContractors, useCategories } from "@/hooks/use-api";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -87,6 +88,7 @@ const Index = () => {
         </div>
       </section>
 
+      <ReviewsSlider />
       <HowItWorks />
       <FAQ />
 

@@ -31,6 +31,14 @@ const Index = () => {
           <div className="mt-8">
             <HeroSearch />
           </div>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Button asChild size="lg">
+              <Link to="/register">Sign Up</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/login">Log In</Link>
+            </Button>
+          </div>
         </div>
       </section>
 

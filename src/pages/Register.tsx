@@ -43,7 +43,11 @@ export default function Register() {
     try {
       await register(name, email, password, role);
       toast({ title: "Success", description: "Account created successfully" });
-      navigate(`/dashboard/${role}`);
+      if (role === "contractor") {
+        navigate("/dashboard/contractor/subscription");
+      } else {
+        navigate("/dashboard/client");
+      }
     } catch (error) {
       toast({ title: "Sign Up Failed", description: getApiError(error), variant: "destructive" });
     } finally {

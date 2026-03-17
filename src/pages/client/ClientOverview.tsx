@@ -1,4 +1,4 @@
-import { LayoutDashboard, Briefcase, Heart, Star, Settings, FileText } from "lucide-react";
+import { LayoutDashboard, Briefcase, Heart, Star, Settings, FileText, CreditCard } from "lucide-react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { StatsCard } from "@/components/StatsCard";
 import { useMyListings, useSavedContractors, useMyTransactions } from "@/hooks/use-api";
@@ -6,8 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
-const navItems = [
+export const clientNavItems = [
   { label: "Overview", path: "/dashboard/client", icon: LayoutDashboard },
+  { label: "Subscription", path: "/dashboard/client/subscription", icon: CreditCard },
   { label: "My Listings", path: "/dashboard/client/listings", icon: Briefcase },
   { label: "Applications", path: "/dashboard/client/applications", icon: FileText },
   { label: "Saved Contractors", path: "/dashboard/client/saved", icon: Heart },
@@ -27,7 +28,7 @@ export default function ClientOverview() {
   const escrowPayments = transactions?.filter(t => t.status === "escrow") ?? [];
 
   return (
-    <DashboardLayout title="Client Dashboard" navItems={navItems}>
+    <DashboardLayout title="Client Dashboard" navItems={clientNavItems}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard title="Active Jobs" value={activeListings.length} icon={Briefcase} />
         <StatsCard title="Total Applications" value={totalApps} icon={FileText} />
@@ -68,5 +69,3 @@ export default function ClientOverview() {
     </DashboardLayout>
   );
 }
-
-export { navItems as clientNavItems };

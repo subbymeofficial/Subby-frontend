@@ -485,6 +485,12 @@ export function useCreateSubscription() {
   });
 }
 
+export function useCreateClientSubscription() {
+  return useMutation({
+    mutationFn: () => paymentsService.createClientSubscription(),
+  });
+}
+
 export function useValidatePromo() {
   return useMutation({
     mutationFn: ({ code, plan }: { code: string; plan: "standard" | "premium" }) =>

@@ -46,7 +46,7 @@ export default function Register() {
       if (role === "contractor") {
         navigate("/dashboard/contractor/subscription");
       } else {
-        navigate("/dashboard/client");
+        navigate("/dashboard/client/subscription");
       }
     } catch (error) {
       toast({ title: "Sign Up Failed", description: getApiError(error), variant: "destructive" });

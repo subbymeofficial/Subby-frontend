@@ -50,6 +50,11 @@ export const paymentsService = {
     return unwrap(res);
   },
 
+  async createClientSubscription(): Promise<{ url: string }> {
+    const res = await apiClient.post("/payments/create-client-subscription");
+    return unwrap(res);
+  },
+
   async upgradeQualification(): Promise<{ url: string }> {
     const res = await apiClient.post("/payments/upgrade-qualification");
     return unwrap(res);

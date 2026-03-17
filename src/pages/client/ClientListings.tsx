@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { clientNavItems } from "./ClientOverview";
-import { useMyListings, useCreateListing, useUpdateListing, useDeleteListing, useCreateJobPayment, useCategories } from "@/hooks/use-api";
+import { useMyListings, useCreateListing, useUpdateListing, useDeleteListing, useCreateJobPayment, useCategories, useSubscriptionStatus } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,8 +17,13 @@ const URGENCY_OPTIONS = ["low", "medium", "high", "urgent"];
 const STATUS_OPTIONS = ["open", "in_progress", "completed", "cancelled"];
 
 export default function ClientListings() {
+  const navigate = useNavigate();
   const { data: listings, isLoading } = useMyListings();
+  const { data: subStatus } = useSubscriptionStatus();
   const createListing = useCreateListing();
+  const hasClientSubscription =
+    subStatus?.plan === "client" &&
+    (subStatus?.status === "active" || subStatus?.status === "trialing");
   const updateListing = useUpdateListing();
   const deleteListing = useDeleteListing();
   const jobPayment = useCreateJobPayment();
@@ -159,14 +165,34 @@ export default function ClientListings() {
 
   return (
     <DashboardLayout title="Client Dashboard" navItems={clientNavItems}>
+      {!hasClientSubscription && (
+        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-50/50 dark:bg-amber-900/10 p-4 flex items-center justify-between gap-4 flex-wrap">
+          <p className="text-foreground font-medium">Subscribe to post job listings.</p>
+          <Button asChild size="sm">
+            <Link to="/dashboard/client/subscription">
+              <CreditCard size={16} className="mr-1" /> Subscribe — $10/week
+            </Link>
+          </Button>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-foreground">My Listings</h2>
-        <Button size="sm" onClick={() => { setShowForm(!showForm); setEditId(null); }}>
+        <Button
+          size="sm"
+          onClick={() => {
+            if (!hasClientSubscription) {
+              navigate("/dashboard/client/subscription");
+              return;
+            }
+            setShowForm(!showForm);
+            setEditId(null);
+          }}
+        >
           <Plus size={16} className="mr-1" /> New Listing
         </Button>
       </div>
 
-      {showForm && !editId && renderForm(form, setForm, handleCreate, createListing.isPending, "Create", () => setShowForm(false))}
+      {showForm && !editId && hasClientSubscription && renderForm(form, setForm, handleCreate, createListing.isPending, "Create", () => setShowForm(false))}
       {editId && renderForm(editForm, setEditForm, handleEdit, updateListing.isPending, "Save Changes", () => setEditId(null))}
 
       {isLoading ? (

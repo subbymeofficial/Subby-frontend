@@ -19,7 +19,7 @@ export interface User {
   isActive: boolean;
   averageRating: number;
   reviewCount: number;
-  subscriptionPlan?: "standard" | "premium" | null;
+  subscriptionPlan?: "standard" | "premium" | "client" | null;
   subscriptionStatus?: "active" | "trialing" | "past_due" | "cancelled" | null;
   subscriptionExpiresAt?: string | null;
   hasQualificationUpgrade?: boolean;

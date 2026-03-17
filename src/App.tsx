@@ -20,6 +20,7 @@ import PaymentCancel from "./pages/PaymentCancel";
 import Contact from "./pages/Contact";
 
 import ClientOverview from "./pages/client/ClientOverview";
+import ClientSubscription from "./pages/client/ClientSubscription";
 import ClientListings from "./pages/client/ClientListings";
 import ClientApplications from "./pages/client/ClientApplications";
 import ClientPayments from "./pages/client/ClientPayments";
@@ -85,6 +86,7 @@ const App = () => (
 
             {/* Client Dashboard */}
             <Route path="/dashboard/client" element={<ProtectedRoute allowedRoles={["client"]}><ClientOverview /></ProtectedRoute>} />
+            <Route path="/dashboard/client/subscription" element={<ProtectedRoute allowedRoles={["client"]}><ClientSubscription /></ProtectedRoute>} />
             <Route path="/dashboard/client/listings" element={<ProtectedRoute allowedRoles={["client"]}><ClientListings /></ProtectedRoute>} />
             <Route path="/dashboard/client/applications" element={<ProtectedRoute allowedRoles={["client"]}><ClientApplications /></ProtectedRoute>} />
             <Route path="/dashboard/client/payments" element={<ProtectedRoute allowedRoles={["client"]}><ClientPayments /></ProtectedRoute>} />

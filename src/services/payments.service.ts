@@ -50,8 +50,8 @@ export const paymentsService = {
     return unwrap(res);
   },
 
-  async createClientSubscription(): Promise<{ url: string }> {
-    const res = await apiClient.post("/payments/create-client-subscription");
+  async createClientSubscription(promoCodeId?: string): Promise<{ url: string }> {
+    const res = await apiClient.post("/payments/create-client-subscription", { promoCodeId });
     return unwrap(res);
   },
 

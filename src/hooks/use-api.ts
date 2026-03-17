@@ -487,7 +487,7 @@ export function useCreateSubscription() {
 
 export function useCreateClientSubscription() {
   return useMutation({
-    mutationFn: () => paymentsService.createClientSubscription(),
+    mutationFn: ({ promoCodeId }: { promoCodeId?: string }) => paymentsService.createClientSubscription(promoCodeId),
   });
 }
 

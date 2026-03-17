@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Check, Loader2, ShieldCheck, CreditCard } from "lucide-react";
@@ -6,19 +7,25 @@ import { useSubscriptionStatus, useCreateClientSubscription, useMyTransactions }
 import { useToast } from "@/hooks/use-toast";
 import { getApiError } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { PromoCodeApply } from "@/components/PromoCodeApply";
+import type { ValidatePromoResult } from "@/services/payments.service";
 
 export default function ClientSubscription() {
   const { data: subStatus, isLoading } = useSubscriptionStatus();
   const { data: transactions } = useMyTransactions();
   const subscribe = useCreateClientSubscription();
   const { toast } = useToast();
+  const [appliedPromoClient, setAppliedPromoClient] = useState<ValidatePromoResult | null>(null);
 
   const subActive = subStatus?.status === "active" || subStatus?.status === "trialing";
   const hasClientPlan = subStatus?.plan === "client";
 
   const handleSubscribe = async () => {
     try {
-      const { url } = await subscribe.mutateAsync();
+      const promo = appliedPromoClient;
+      const { url } = await subscribe.mutateAsync({
+        promoCodeId: promo?.valid ? promo.promoCodeId : undefined,
+      });
       window.location.href = url;
     } catch (error) {
       toast({ title: "Error", description: getApiError(error), variant: "destructive" });
@@ -56,6 +63,7 @@ export default function ClientSubscription() {
           )}
           <h3 className="text-xl font-bold text-foreground">Client Plan</h3>
           <p className="mt-1 text-3xl font-bold text-primary">$10<span className="text-base font-normal text-muted-foreground">/week</span></p>
+          <p className="mt-1 text-xs text-muted-foreground">First 2 weeks free!</p>
           <p className="mt-2 text-sm text-muted-foreground">Post jobs and hire verified contractors.</p>
           <ul className="mt-4 space-y-2">
             {["Post job listings", "Receive contractor applications", "Pay for completed jobs (escrow)", "Message contractors", "Leave reviews"].map((f) => (
@@ -64,6 +72,16 @@ export default function ClientSubscription() {
               </li>
             ))}
           </ul>
+          {!hasClientPlan && (
+            <div className="mt-4">
+              <PromoCodeApply
+                plan="standard"
+                appliedResult={appliedPromoClient}
+                onApplied={setAppliedPromoClient}
+                onRemove={() => setAppliedPromoClient(null)}
+              />
+            </div>
+          )}
           {hasClientPlan ? (
             <Button variant="outline" className="mt-6 w-full" disabled type="button">Current Plan</Button>
           ) : (
@@ -74,7 +92,9 @@ export default function ClientSubscription() {
               disabled={subscribe.isPending}
             >
               {subscribe.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Subscribe — $10/week
+              {appliedPromoClient?.valid
+                ? `Subscribe — $${((appliedPromoClient.discountedAmount ?? 1000) / 100).toFixed(2)}/week`
+                : "Subscribe — $10/week"}
             </Button>
           )}
         </div>

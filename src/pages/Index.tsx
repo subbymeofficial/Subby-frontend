@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { HeroSearch } from "@/components/HeroSearch";
 import { ContractorCard } from "@/components/ContractorCard";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -28,9 +27,6 @@ const Index = () => {
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
             Find trusted local contractors for any job. From plumbing to painting, SubbyMe connects you with verified tradespeople in your area.
           </p>
-          <div className="mt-8">
-            <HeroSearch />
-          </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
               <Link to="/register">Sign Up</Link>

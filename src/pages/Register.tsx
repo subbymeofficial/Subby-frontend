@@ -74,8 +74,8 @@ export default function Register() {
               <Label>I want to</Label>
               <div className="grid grid-cols-2 gap-3">
                 {([
-                  { value: "client" as UserRole, label: "Hire Contractors", desc: "Find skilled help for your projects" },
-                  { value: "contractor" as UserRole, label: "Get Hired", desc: "Offer your skills and grow your business" },
+                  { value: "client" as UserRole, label: "Find Subcontractors", desc: "Hire skilled subcontractors for your projects" },
+                  { value: "contractor" as UserRole, label: "Sign up as a Subcontractor", desc: "Offer your skills and get hired for jobs" },
                 ]).map((r) => (
                   <button
                     key={r.value}

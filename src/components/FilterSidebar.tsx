@@ -5,6 +5,7 @@ import { Switch } from "./ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Button } from "./ui/button";
 import { SlidersHorizontal, X } from "lucide-react";
+import { AvailabilityFilter } from "./AvailabilityFilter";
 
 interface Filters {
   location: string;
@@ -106,6 +107,7 @@ export function FilterSidebar({ filters, onChange, mobileOpen, onClose }: Filter
   return (
     <>
       <aside className="hidden lg:block w-72 shrink-0 rounded-lg border bg-card p-5 card-shadow h-fit sticky top-24">
+      <AvailabilityFilter />
         {content}
       </aside>
       {mobileOpen && (

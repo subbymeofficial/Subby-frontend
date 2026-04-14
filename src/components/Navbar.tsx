@@ -4,6 +4,7 @@ import { Menu, X, LogOut, User, MessageSquare } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "./ui/button";
 import { NotificationDropdown } from "./NotificationDropdown";
+import { MarketToggle } from "./MarketToggle";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -43,7 +44,8 @@ export function Navbar() {
               <Button asChild variant="ghost" size="sm">
                 <Link to="/messages"><MessageSquare size={16} className="mr-1" /> Messages</Link>
               </Button>
-              <NotificationDropdown />
+              <MarketToggle />
+          <NotificationDropdown />
               <Button asChild variant="ghost" size="sm">
                 <Link to={dashboardPath}><User size={16} className="mr-1" /> Dashboard</Link>
               </Button>

@@ -9,6 +9,8 @@ import { ReviewsSlider } from "@/components/ReviewsSlider";
 import { useContractors, useCategories } from "@/hooks/use-api";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TrustBar } from "@/components/TrustBar";
+import { FoundingMemberBanner } from "@/components/FoundingMemberBanner";
 
 const Index = () => {
   const { data, isLoading } = useContractors({ limit: 4, isVerified: true });
@@ -18,6 +20,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <FoundingMemberBanner variant="sticky" />
 
       <section className="border-b bg-secondary py-16 sm:py-24">
         <div className="container-main text-center">
@@ -93,6 +96,7 @@ const Index = () => {
       </section>
 
       <ReviewsSlider />
+      <TrustBar />
       <HowItWorks />
       <FAQ />
 

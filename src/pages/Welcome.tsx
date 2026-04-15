@@ -5,22 +5,22 @@ import { Button } from "@/components/ui/button";
  * Post-signup welcome screen.
  * Route: /onboarding/welcome
  *
- * First thing a freshly-registered contractor sees. Celebrates the sign-up,
- * sets expectations, gives one clear CTA to start the profile wizard.
- *
  * Accepts ?name=Reece&role=contractor in the URL so Register can hand off
  * the user's first name without a dependency on AuthContext shape.
+ *
+ * Routing rules (paid/free model):
+ *  - role = contractor (PAID): goes to subscription page first
+ *  - role = hirer | client  (FREE): goes straight to their dashboard
  */
 export default function Welcome() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-
   const firstName = (params.get("name") || "mate").trim();
   const role = params.get("role") || "contractor";
 
   const startPath =
     role === "hirer" || role === "client"
-      ? "/dashboard/client/edit-profile"
+      ? "/dashboard/client"
       : "/dashboard/contractor/subscription";
 
   return (
@@ -34,13 +34,13 @@ export default function Welcome() {
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
         />
-
         <h1 className="text-4xl font-black tracking-tight text-[#2E3192]">
           Welcome to SubbyMe, {firstName} 👋
         </h1>
         <p className="mt-3 text-slate-600 max-w-lg mx-auto">
-          Let's build a profile builders actually call back. It takes about
-          5 minutes — you can come back and edit anything later.
+          {role === "hirer" || role === "client"
+            ? "You're in — finding trusted subbies is free. Post a job or browse contractors in your area."
+            : "Let's get you listed. Pick a plan and we'll set up your profile so builders can hire you."}
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
@@ -49,7 +49,7 @@ export default function Welcome() {
             className="bg-[#2E3192] hover:bg-[#1E2270] text-white font-semibold"
             onClick={() => navigate(startPath)}
           >
-            Start profile setup →
+            {role === "hirer" || role === "client" ? "Go to dashboard →" : "Choose your plan →"}
           </Button>
           <Button
             size="lg"
@@ -66,11 +66,13 @@ export default function Welcome() {
           <span className="font-semibold text-[#2E3192]">4.2× more quote requests</span>.
         </p>
 
-        <div className="mt-10 grid sm:grid-cols-3 gap-3 text-left">
-          <StepCard label="Step 1" title="Your trade" body="Pick your main trade + up to 5 specialties." />
-          <StepCard label="Step 2" title="Where you work" body="Home postcode and how far you'll travel." />
-          <StepCard label="Step 3" title="Prove the work" body="Licence, insurance and safety tickets." />
-        </div>
+        {role !== "hirer" && role !== "client" && (
+          <div className="mt-10 grid sm:grid-cols-3 gap-3 text-left">
+            <StepCard label="Step 1" title="Your trade" body="Pick your main trade + up to 5 specialties." />
+            <StepCard label="Step 2" title="Where you work" body="Home postcode and how far you'll travel." />
+            <StepCard label="Step 3" title="Prove the work" body="Licence, insurance and safety tickets." />
+          </div>
+        )}
       </div>
 
       <div className="mt-10 text-xs text-slate-400">

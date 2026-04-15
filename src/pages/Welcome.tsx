@@ -20,8 +20,8 @@ export default function Welcome() {
 
   const startPath =
     role === "hirer" || role === "client"
-      ? "/dashboard/client/subscription"
-      : "/dashboard/contractor/edit-profile";
+      ? "/dashboard/client/edit-profile"
+      : "/dashboard/contractor/subscription";
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6 py-12">

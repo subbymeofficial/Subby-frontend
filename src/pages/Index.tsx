@@ -32,7 +32,7 @@ export default function Index() {
           </div>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            The home of trusted subcontractors — built for Australian and American trades.
+            The home of trusted subcontractors — free for builders, fair monthly listing for subbies. Built for Australian and American trades.
           </p>
 
           {/* Two role cards */}
@@ -44,7 +44,7 @@ export default function Index() {
               </div>
               <h2 className="text-xl font-bold">I'm a Subcontractor</h2>
               <p className="text-sm text-muted-foreground">
-                List your trade, get found by builders, and lock in founding-member pricing.
+                List your trade and get hired by builders nationwide. Founding-member pricing — first 100 subbies locked in.
               </p>
               <div className="flex flex-col gap-2 w-full pt-2">
                 <Button size="lg" className="w-full" onClick={() => navigate("/onboarding/country?role=contractor")}>
@@ -63,7 +63,7 @@ export default function Index() {
               </div>
               <h2 className="text-xl font-bold">I'm a Builder / Hirer</h2>
               <p className="text-sm text-muted-foreground">
-                Find vetted subcontractors fast — message, book and pay in one place.
+                Free to join. Find vetted subcontractors fast — message, book and rate after the job.
               </p>
               <div className="flex flex-col gap-2 w-full pt-2">
                 <Button size="lg" variant="outline" className="w-full" onClick={() => navigate("/onboarding/country?role=hirer")}>

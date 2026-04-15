@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import type { UserRole } from "@/lib/types";
 import { Loader2 } from "lucide-react";
@@ -8,8 +8,21 @@ interface ProtectedRouteProps {
   allowedRoles?: UserRole[];
 }
 
+/**
+ * Subscription-aware route guard.
+ *
+ * Rules:
+ *  - Not logged in        → /login
+ *  - Role not allowed     → /
+ *  - Contractor without an active/trialing subscription → /dashboard/contractor/subscription
+ *    (the subscription page, the contractor overview and /messages/settings stay reachable
+ *    so the subbie can actually pay and still receive messages.)
+ *
+ * Clients (builders/hirers) and admins are never paywalled.
+ */
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, isAuthenticated, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -20,7 +33,29 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role))
+    return <Navigate to="/" replace />;
+
+  // Contractor subscription gate
+  if (user && user.role === "contractor") {
+    const hasActiveSub =
+      user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing";
+
+    // Pages a contractor can reach WITHOUT paying (so they can actually pay,
+    // read messages, and manage their account)
+    const allowlist = [
+      "/dashboard/contractor",
+      "/dashboard/contractor/subscription",
+      "/dashboard/contractor/settings",
+      "/messages",
+    ];
+    const onAllowlisted = allowlist.some((p) => location.pathname === p || location.pathname.startsWith(p + "/"));
+
+    if (!hasActiveSub && !onAllowlisted) {
+      return <Navigate to="/dashboard/contractor/subscription" replace />;
+    }
+  }
 
   return <>{children}</>;
 }

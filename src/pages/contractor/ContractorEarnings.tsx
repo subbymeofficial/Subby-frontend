@@ -2,14 +2,15 @@ import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { contractorNavItems } from "./ContractorOverview";
 import { useContractorEarnings, useMyTransactions } from "@/hooks/use-api";
-import { Loader2, DollarSign, TrendingUp, Clock } from "lucide-react";
+import { Loader2, DollarSign, TrendingUp, Clock, AlertTriangle } from "lucide-react";
 import { StatsCard } from "@/components/StatsCard";
 
 export default function ContractorEarnings() {
-  const { data: earnings, isLoading: earningsLoading } = useContractorEarnings();
-  const { data: allTx, isLoading: txLoading } = useMyTransactions();
+  const { data: earnings, isLoading: earningsLoading, isError: earningsError } = useContractorEarnings();
+  const { data: allTx, isLoading: txLoading, isError: txError } = useMyTransactions();
 
   const isLoading = earningsLoading || txLoading;
+  const isError = earningsError || txError;
   const jobTx = earnings?.transactions ?? [];
   const subTx = allTx?.filter((t) => t.type === "subscription" || t.type === "qualification_upgrade") ?? [];
 
@@ -20,6 +21,12 @@ export default function ContractorEarnings() {
       {isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : isError ? (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center">
+          <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
+          <p className="mt-2 font-medium text-destructive">Failed to load earnings</p>
+          <p className="mt-1 text-sm text-muted-foreground">Please refresh the page and try again.</p>
         </div>
       ) : (
         <>

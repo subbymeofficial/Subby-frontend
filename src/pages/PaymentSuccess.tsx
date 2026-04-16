@@ -9,7 +9,7 @@ import apiClient from "@/lib/api-client";
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
-  const { refreshUser } = useAuth();
+  const { refreshUser, user } = useAuth();
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationError, setVerificationError] = useState<string | null>(null);
 
@@ -20,8 +20,7 @@ export default function PaymentSuccess() {
           await apiClient.post("/payments/verify-session", { sessionId });
           await refreshUser();
         } catch (error: any) {
-          console.error("Verification error:", error);
-          setVerificationError(error?.response?.data?.message || "Failed to verify payment");
+              setVerificationError(error?.response?.data?.message || "Failed to verify payment");
         } finally {
           setIsVerifying(false);
         }

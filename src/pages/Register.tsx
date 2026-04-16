@@ -16,7 +16,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [searchParams] = useSearchParams();
   const roleParam = searchParams.get("role");
-  const initialRole: UserRole = roleParam === "contractor" ? "subcontractor" : "client";
+  const initialRole: UserRole = roleParam === "contractor" ? "contractor" : "client";
   const [role, setRole] = useState<UserRole>(initialRole);
   const [isLoading, setIsLoading] = useState(false);
   const { register, registerWithGoogle } = useAuth();

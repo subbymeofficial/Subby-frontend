@@ -74,7 +74,7 @@ export default function ContractorSubscription() {
           )}
           <h3 className="text-xl font-bold text-foreground">Standard</h3>
           <p className="mt-1 text-3xl font-bold text-primary">$10<span className="text-base font-normal text-muted-foreground">/week</span></p>
-          <p className="mt-1 text-xs text-muted-foreground">First 2 weeks free!</p>
+          <p className="mt-1 text-xs text-muted-foreground">First year free — founding member!</p>
           <ul className="mt-4 space-y-2">
             {["Profile listing", "Up to 20 messages/month", "Basic analytics", "Search visibility"].map((f) => (
               <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -114,7 +114,7 @@ export default function ContractorSubscription() {
           )}
           <h3 className="text-xl font-bold text-foreground">Premium</h3>
           <p className="mt-1 text-3xl font-bold text-foreground">$25<span className="text-base font-normal text-muted-foreground">/week</span></p>
-          <p className="mt-1 text-xs text-muted-foreground">First 2 weeks free!</p>
+          <p className="mt-1 text-xs text-muted-foreground">First year free — founding member!</p>
           <ul className="mt-4 space-y-2">
             {["Everything in Standard", "Unlimited messages", "Priority search placement", "Featured badge", "Advanced analytics"].map((f) => (
               <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">

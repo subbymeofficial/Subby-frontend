@@ -1,5 +1,6 @@
 import {
   LayoutDashboard, UserCog, CreditCard, FileCheck, Briefcase, Star, Settings, ShieldCheck, Calendar, DollarSign,
+ Loader2,
 } from "lucide-react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { StatsCard } from "@/components/StatsCard";
@@ -25,10 +26,16 @@ const navItems = [
 export default function ContractorOverview() {
   const { user } = useAuth();
   const userId = user?._id || user?.id;
-  const { data: applications } = useMyApplications();
+  const { data: applications, isLoading: appsLoading } = useMyApplications();
   const { data: reviewsData } = useUserReviews(userId);
-  const { data: subStatus } = useSubscriptionStatus();
+  const { data: subStatus, isLoading: subLoading } = useSubscriptionStatus();
   const { data: earnings } = useContractorEarnings();
+  const isLoading = appsLoading || subLoading;
+  if (isLoading) return (
+    <DashboardLayout title="Contractor Dashboard" navItems={navItems}>
+      <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+    </DashboardLayout>
+  );
 
   const pendingApps = applications?.filter((a) => a.status === "pending") ?? [];
   const acceptedApps = applications?.filter((a) => a.status === "accepted") ?? [];
@@ -61,7 +68,7 @@ export default function ContractorOverview() {
           <div>
             <p className="font-semibold text-foreground capitalize">{subStatus?.plan} Plan — Active</p>
             <p className="text-sm text-muted-foreground">
-              {subStatus?.status === "trialing" ? "Free trial" : "Subscription active"}
+              {subStatus?.status === "trialing" ? "Founding member — free year active" : "Subscription active"}
               {subStatus?.expiresAt && ` · Renews ${new Date(subStatus.expiresAt).toLocaleDateString()}`}
             </p>
           </div>

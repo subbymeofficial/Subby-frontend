@@ -10,16 +10,32 @@ import { contractorNavItems } from "./ContractorOverview";
 import { useAuth, getApiError } from "@/context/AuthContext";
 import { useUpdateProfile, useToggleAvailability } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Check, PartyPopper } from "lucide-react";
+import { Loader2, PartyPopper, Plus, X } from "lucide-react";
 import { ProfileImageUpload } from "@/components/ProfileImageUpload";
 import { VerificationDocumentsUpload } from "@/components/VerificationDocumentsUpload";
 
-const TRADE_OPTIONS = [
-  "Electrician", "Plumber", "Carpenter", "Tiler", "Painter", "Roofer",
-  "Concreter", "Plasterer", "Bricklayer", "Landscaper", "HVAC", "Glazier",
-  "Excavator Op.", "Labourer", "Scaffolder", "Welder", "Steel Fixer",
-  "Cabinet Maker", "Waterproofer", "Demolition",
-];
+const TRADES_BY_CATEGORY: Record<string, string[]> = {
+  "Boilermaker / Welder": ["Boilermaker", "Welder - MIG", "Welder - TIG", "Welder - Stick/Arc", "Pipe Welder", "Steel Fabricator"],
+  "Building": ["Piling Labourer", "Piling Rig Operator", "Crane Operator", "Tower Crane Operator", "Excavator Operator", "Builders Labourer", "Carpenter", "Roofer", "Concreter", "Stonemason", "Scaffolder", "Plasterer", "Tiler", "Bricklayer", "Demolition", "Fencer", "Glazier", "Gyprocker / Drywaller", "Insulation Installer", "Renderer", "Waterproofer"],
+  "Civil": ["Labourer", "Excavator Operator", "Grader Operator", "Moxy Operator", "Supervisor", "Project Manager", "Crane Operator", "Concretor - Civil", "Drainer", "Pipelayer", "Road Worker", "Traffic Controller"],
+  "Corporate": ["Reception Staff", "Data Entry Clerk", "Administrative Assistant", "Project Manager", "Site Supervisor", "Estimator", "Bookkeeper"],
+  "Electrician": ["Residential", "Commercial", "Air Conditioning", "Solar", "Industrial"],
+  "Mechanical": ["Automotive", "Light Engines", "Marine", "Heavy Diesel", "HVAC Technician", "Refrigeration Mechanic", "Mechanical Fitter", "Fire Protection"],
+  "Owner Operators": ["Mini Excavator up to 2.5t", "Excavator 2.6-5t", "5-6t Combo (excavator, bobcat, tipper)", "6.5-8t Excavator", "6.5-8t Combo (excavator, bobcat, tipper)", "8.5-10t Excavator", "10.5-13.5t Excavator", "14t-19t Excavator", "20-25t Excavator", "26-30t Excavator", "30t plus Excavator", "Grader", "Posi Track / Bobcat", "Water Cart", "Franna Crane", "Crane Truck", "6m3 Tipper", "10m3 Tipper / Dump Truck", "Truck and Tri Axel Tipper", "Truck and 4 Axel Trailer (PBS)", "Concrete Line Pump", "Concrete Boom Pump", "Roller / Compactor", "Telehandler", "EWP / Boom Lift", "Scissor Lift"],
+  "Painter": ["Building", "Automotive", "Industrial / Commercial"],
+  "Plumbing": ["Residential", "Civil", "Commercial", "Gas Fitter", "Drainer / Drainage"],
+  "Landscaping & Outdoor": ["Landscaper", "Lawn & Turf Specialist", "Arborist / Tree Surgeon", "Paving Specialist", "Retaining Wall Builder", "Irrigation Installer", "Pool Builder", "Deck & Pergola Builder", "Bobcat & Garden Labourer"],
+  "Cleaning Services": ["Commercial Cleaner", "Residential Cleaner", "Window Cleaner", "Carpet Cleaner", "Pressure Washer", "Construction Cleaner", "Industrial Cleaner", "Bin & Waste Cleaner", "End of Lease Cleaner"],
+  "Personal Services": ["Barber", "Hairdresser / Stylist", "Beauty Therapist", "Nail Technician", "Massage Therapist", "Dog Groomer", "Personal Trainer", "Photographer", "Videographer", "Makeup Artist"],
+  "Hospitality & Events": ["Chef / Cook", "Bartender", "Wait Staff", "Event Setup Crew", "Caterer", "DJ / Sound Tech", "Security Guard", "Barista"],
+  "Transport & Delivery": ["Courier / Delivery Driver", "Furniture Removalist", "Tow Truck Operator", "Truck Driver - HR/HC/MC"],
+  "IT & Technology": ["IT Support Technician", "CCTV / Security Installer", "Data Cabling Installer", "AV Installer", "Smart Home Installer", "Phone / Intercom Installer", "Web Developer / Designer", "Graphic Designer"],
+  "Home Services": ["Handyman", "Locksmith", "Pest Controller", "Appliance Repairer", "Curtain & Blind Installer", "Antenna Installer", "Cabinet Maker", "Garage Door Installer", "Mobile Mechanic"],
+  "Temping & Freelance": ["Receptionist", "Teacher / Tutor", "Teacher Aide", "Childcare Worker", "Aged Care Worker", "Disability Support Worker", "Registered Nurse", "Enrolled Nurse", "Dental Nurse / Assistant", "Physiotherapist", "Occupational Therapist", "Speech Pathologist", "Accountant", "Bookkeeper", "Legal Secretary", "Paralegal", "Marketing Consultant", "Copywriter", "Virtual Assistant", "Interpreter / Translator", "Real Estate Agent", "Property Manager", "Mortgage Broker", "Insurance Broker", "Warehouse Worker", "Forklift Operator", "Labourer - General", "Night Fill / Shelf Stacker", "Retail Assistant"],
+  "Specialty & Other": ["Sign Writer", "Line Marker", "Sandblaster", "Asbestos Removalist", "Diver - Commercial", "Surveyor", "Drafts Person / CAD", "Safety Officer / Advisor", "First Aid Officer"],
+};
+
+const CATEGORY_KEYS = Object.keys(TRADES_BY_CATEGORY);
 
 const TICKET_OPTIONS = [
   "White Card", "Working at Heights", "Confined Space", "Asbestos Awareness",
@@ -60,14 +76,30 @@ export default function ContractorEditProfile() {
     availableDays: (user as any)?.availableDays || [] as string[],
   });
 
-  const toggleInArray = (key: "trades" | "tickets" | "insurance" | "availableDays", value: string) => {
+  const [pickerCategory, setPickerCategory] = useState("");
+  const [pickerSpecialisation, setPickerSpecialisation] = useState("");
+
+  const toggleInArray = (key: "tickets" | "insurance" | "availableDays", value: string) => {
     setForm((f) => {
       const list = f[key] as string[];
-      return {
-        ...f,
-        [key]: list.includes(value) ? list.filter((x) => x !== value) : [...list, value],
-      };
+      return { ...f, [key]: list.includes(value) ? list.filter((x) => x !== value) : [...list, value] };
     });
+  };
+
+  const addTrade = () => {
+    if (!pickerCategory || !pickerSpecialisation) return;
+    const tradeValue = `${pickerCategory} > ${pickerSpecialisation}`;
+    if (form.trades.includes(tradeValue)) {
+      toast({ title: "Already added", description: "That trade is already in your list.", variant: "destructive" });
+      return;
+    }
+    setForm((f) => ({ ...f, trades: [...f.trades, tradeValue] }));
+    setPickerCategory("");
+    setPickerSpecialisation("");
+  };
+
+  const removeTrade = (trade: string) => {
+    setForm((f) => ({ ...f, trades: f.trades.filter((t) => t !== trade) }));
   };
 
   const abnValid = form.abn.replace(/\s/g, "").length === 11;
@@ -81,15 +113,17 @@ export default function ContractorEditProfile() {
       return;
     }
     if (form.trades.length === 0) {
-      toast({ title: "Pick at least one trade", description: "Select the trades you work in so builders can find you.", variant: "destructive" });
+      toast({ title: "Add at least one trade", description: "Select your category and specialisation.", variant: "destructive" });
       return;
     }
     try {
+      // Derive a legacy single-trade field from the first entry for backward compat
+      const primaryTrade = form.trades[0]?.split(" > ").pop() || form.trades[0] || "";
       await updateProfile.mutateAsync({
         id: userId,
         data: {
           name: form.name,
-          trade: form.trades[0] || "",
+          trade: primaryTrade,
           trades: form.trades,
           abn: form.abn.replace(/\s/g, ""),
           location: form.location,
@@ -172,6 +206,8 @@ export default function ContractorEditProfile() {
             <ProfileImageUpload />
           </div>
           <div className="mt-6 space-y-6">
+
+            {/* Name + ABN */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Full Name</Label>
@@ -185,40 +221,86 @@ export default function ContractorEditProfile() {
                   placeholder="XX XXX XXX XXX"
                   inputMode="numeric"
                 />
-                {form.abn && !abnValid && (
-                  <p className="text-xs text-destructive">Must be 11 digits.</p>
-                )}
+                {form.abn && !abnValid && <p className="text-xs text-destructive">Must be 11 digits.</p>}
               </div>
             </div>
 
-            {/* Trades multi-picker */}
-            <div className="space-y-2">
-              <Label>Trades you work in <span className="text-xs text-muted-foreground">(pick one or more)</span></Label>
-              <div className="flex flex-wrap gap-2">
-                {TRADE_OPTIONS.map((t) => {
-                  const active = form.trades.includes(t);
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => toggleInArray("trades", t)}
-                      className={`rounded-full border px-3 py-1.5 text-sm transition ${
-                        active
-                          ? "bg-[#2E3192] text-white border-[#2E3192]"
-                          : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
-                      }`}
+            {/* Trades */}
+            <div className="space-y-3">
+              <Label>Trades <span className="text-xs text-muted-foreground">(add one or more)</span></Label>
+
+              {/* Selected trade chips */}
+              {form.trades.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {form.trades.map((trade) => (
+                    <span
+                      key={trade}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[#2E3192] text-white text-sm px-3 py-1.5 font-medium"
                     >
-                      {active && <Check className="inline h-3 w-3 mr-1" />}
-                      {t}
-                    </button>
-                  );
-                })}
+                      {trade}
+                      <button
+                        type="button"
+                        onClick={() => removeTrade(trade)}
+                        className="rounded-full hover:bg-white/20 p-0.5 transition"
+                        aria-label={`Remove ${trade}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Category + Specialisation picker */}
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Category</label>
+                    <select
+                      value={pickerCategory}
+                      onChange={(e) => { setPickerCategory(e.target.value); setPickerSpecialisation(""); }}
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E3192]/40"
+                    >
+                      <option value="">Select category...</option>
+                      {CATEGORY_KEYS.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Specialisation</label>
+                    <select
+                      value={pickerSpecialisation}
+                      onChange={(e) => setPickerSpecialisation(e.target.value)}
+                      disabled={!pickerCategory}
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E3192]/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select specialisation...</option>
+                      {pickerCategory &&
+                        TRADES_BY_CATEGORY[pickerCategory]?.map((spec) => (
+                          <option key={spec} value={spec}>{spec}</option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={addTrade}
+                  disabled={!pickerCategory || !pickerSpecialisation}
+                  className="bg-[#2E3192] hover:bg-[#1E2270] disabled:opacity-40"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  {form.trades.length === 0 ? "Add trade" : "Add another trade"}
+                </Button>
               </div>
+
               {form.trades.length === 0 && (
-                <p className="text-xs text-destructive">Select at least one trade.</p>
+                <p className="text-xs text-destructive">Add at least one trade to continue.</p>
               )}
             </div>
 
+            {/* Location */}
             <div className="space-y-2">
               <Label>Location</Label>
               <Input
@@ -228,6 +310,7 @@ export default function ContractorEditProfile() {
               />
             </div>
 
+            {/* Rate + Phone */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Hourly Rate ($)</Label>
@@ -239,13 +322,11 @@ export default function ContractorEditProfile() {
               </div>
               <div className="space-y-2">
                 <Label>Phone</Label>
-                <Input
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
+                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
             </div>
 
+            {/* Bio */}
             <div className="space-y-2">
               <Label>Bio</Label>
               <Textarea
@@ -256,6 +337,7 @@ export default function ContractorEditProfile() {
               />
             </div>
 
+            {/* Skills */}
             <div className="space-y-2">
               <Label>Skills <span className="text-xs text-muted-foreground">(comma-separated)</span></Label>
               <Input
@@ -265,7 +347,7 @@ export default function ContractorEditProfile() {
               />
             </div>
 
-            {/* Tickets / Certifications */}
+            {/* Tickets */}
             <div className="space-y-2">
               <Label>Tickets &amp; certifications</Label>
               <div className="flex flex-wrap gap-2">
@@ -277,12 +359,9 @@ export default function ContractorEditProfile() {
                       type="button"
                       onClick={() => toggleInArray("tickets", t)}
                       className={`rounded-full border px-3 py-1.5 text-sm transition ${
-                        active
-                          ? "bg-[#FBBF24] text-slate-900 border-[#FBBF24]"
-                          : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
+                        active ? "bg-[#FBBF24] text-slate-900 border-[#FBBF24]" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                       }`}
                     >
-                      {active && <Check className="inline h-3 w-3 mr-1" />}
                       {t}
                     </button>
                   );
@@ -302,12 +381,9 @@ export default function ContractorEditProfile() {
                       type="button"
                       onClick={() => toggleInArray("insurance", t)}
                       className={`rounded-full border px-3 py-1.5 text-sm transition ${
-                        active
-                          ? "bg-emerald-600 text-white border-emerald-600"
-                          : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
+                        active ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                       }`}
                     >
-                      {active && <Check className="inline h-3 w-3 mr-1" />}
                       {t}
                     </button>
                   );
@@ -327,9 +403,7 @@ export default function ContractorEditProfile() {
                       type="button"
                       onClick={() => toggleInArray("availableDays", d)}
                       className={`rounded-md border px-4 py-2 text-sm font-medium transition ${
-                        active
-                          ? "bg-[#2E3192] text-white border-[#2E3192]"
-                          : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
+                        active ? "bg-[#2E3192] text-white border-[#2E3192]" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                       }`}
                     >
                       {d}

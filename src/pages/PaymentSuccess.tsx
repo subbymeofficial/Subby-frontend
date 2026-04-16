@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, UserCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import apiClient from "@/lib/api-client";
 
@@ -10,6 +10,7 @@ export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { refreshUser, user } = useAuth();
+  const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationError, setVerificationError] = useState<string | null>(null);
 
@@ -20,7 +21,7 @@ export default function PaymentSuccess() {
           await apiClient.post("/payments/verify-session", { sessionId });
           await refreshUser();
         } catch (error: any) {
-              setVerificationError(error?.response?.data?.message || "Failed to verify payment");
+          setVerificationError(error?.response?.data?.message || "Failed to verify payment");
         } finally {
           setIsVerifying(false);
         }
@@ -28,7 +29,6 @@ export default function PaymentSuccess() {
         setIsVerifying(false);
       }
     };
-
     verifyAndActivate();
   }, [sessionId, refreshUser]);
 
@@ -49,6 +49,8 @@ export default function PaymentSuccess() {
     );
   }
 
+  const isContractor = user?.role === 'contractor';
+
   return (
     <div className="min-h-screen bg-secondary">
       <Navbar />
@@ -57,10 +59,15 @@ export default function PaymentSuccess() {
           <div className="flex justify-center">
             <CheckCircle className="h-16 w-16 text-success" />
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-foreground">Payment Successful!</h1>
+          <h1 className="mt-4 text-2xl font-bold text-foreground">
+            {isContractor ? "You're in! 🎉" : "Payment Successful!"}
+          </h1>
           <p className="mt-2 text-muted-foreground">
-            Your payment has been processed successfully. Your account has been updated.
+            {isContractor
+              ? "Your subscription is active. Now let's set up your profile so clients can find and hire you."
+              : "Your payment has been processed successfully. Your account has been updated."}
           </p>
+
           {verificationError && (
             <div className="mt-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3">
               <p className="text-sm text-destructive">{verificationError}</p>
@@ -69,18 +76,36 @@ export default function PaymentSuccess() {
               </p>
             </div>
           )}
+
           {sessionId && (
             <p className="mt-2 text-xs text-muted-foreground font-mono">
               Session: {sessionId.slice(0, 20)}...
             </p>
           )}
+
           <div className="mt-6 flex flex-col gap-2">
-            <Button asChild>
-              <Link to={user?.role === 'contractor' ? '/dashboard/contractor/subscription' : '/dashboard/client/subscription'}>View Subscription</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/">Back to Home</Link>
-            </Button>
+            {isContractor ? (
+              <>
+                <Button asChild size="lg" className="bg-[#2E3192] hover:bg-[#1E2270]">
+                  <Link to="/dashboard/contractor/profile?onboarding=true">
+                    <UserCircle className="mr-2 h-5 w-5" />
+                    Complete Your Profile
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/dashboard/contractor/subscription">View Subscription</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild>
+                  <Link to="/dashboard/client/subscription">View Subscription</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/">Back to Home</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

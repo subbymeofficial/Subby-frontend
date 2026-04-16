@@ -48,7 +48,7 @@ export default function ClientSubscription() {
           <div>
             <p className="font-semibold text-foreground">Client Plan — Active</p>
             <p className="text-sm text-muted-foreground">
-              {subStatus?.status === "trialing" ? "Free trial active" : "Subscription active"}
+              {subStatus?.status === "trialing" ? "Founding member — free year active" : "Subscription active"}
               {subStatus?.expiresAt && ` · Renews ${new Date(subStatus.expiresAt).toLocaleDateString()}`}
             </p>
           </div>
@@ -75,7 +75,7 @@ export default function ClientSubscription() {
           {!hasClientPlan && (
             <div className="mt-4">
               <PromoCodeApply
-                plan="standard"
+                plan="client"
                 appliedResult={appliedPromoClient}
                 onApplied={setAppliedPromoClient}
                 onRemove={() => setAppliedPromoClient(null)}

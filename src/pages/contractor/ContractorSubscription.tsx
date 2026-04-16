@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Loader2, ShieldCheck, CreditCard } from "lucide-react";
 import { contractorNavItems } from "./ContractorOverview";
-import { useSubscriptionStatus, useCreateSubscription, useUpgradeQualification, useMyTransactions } from "@/hooks/use-api";
+import { useSubscriptionStatus, useCreateSubscription, useMyTransactions } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
 import { getApiError } from "@/context/AuthContext";
 import { PromoCodeApply } from "@/components/PromoCodeApply";
@@ -14,7 +14,6 @@ export default function ContractorSubscription() {
   const { data: subStatus, isLoading } = useSubscriptionStatus();
   const { data: transactions } = useMyTransactions();
   const subscribe = useCreateSubscription();
-  const upgrade = useUpgradeQualification();
   const { toast } = useToast();
   const [appliedPromoStandard, setAppliedPromoStandard] = useState<ValidatePromoResult | null>(null);
   const [appliedPromoPremium, setAppliedPromoPremium] = useState<ValidatePromoResult | null>(null);
@@ -32,14 +31,6 @@ export default function ContractorSubscription() {
     }
   };
 
-  const handleUpgrade = async () => {
-    try {
-      const { url } = await upgrade.mutateAsync();
-      window.location.href = url;
-    } catch (error) {
-      toast({ title: "Error", description: getApiError(error), variant: "destructive" });
-    }
-  };
 
   if (isLoading) {
     return (
@@ -58,7 +49,7 @@ export default function ContractorSubscription() {
           <div>
             <p className="font-semibold text-foreground capitalize">{currentPlan} Plan — Active</p>
             <p className="text-sm text-muted-foreground">
-              {subStatus?.status === "trialing" ? "Free trial active" : "Subscription active"}
+              {subStatus?.status === "trialing" ? "Founding member — free year active" : "Subscription active"}
               {subStatus?.expiresAt && ` · Renews ${new Date(subStatus.expiresAt).toLocaleDateString()}`}
             </p>
           </div>
@@ -116,7 +107,7 @@ export default function ContractorSubscription() {
           <p className="mt-1 text-3xl font-bold text-foreground">$25<span className="text-base font-normal text-muted-foreground">/week</span></p>
           <p className="mt-1 text-xs text-muted-foreground">First year free — founding member!</p>
           <ul className="mt-4 space-y-2">
-            {["Everything in Standard", "Unlimited messages", "Priority search placement", "Featured badge", "Advanced analytics"].map((f) => (
+            {["Everything in Standard", "Unlimited messages", "Priority search placement", "Featured badge", "Advanced analytics", "Verified Qualification Badge"].map((f) => (
               <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Check size={16} className="text-success" />{f}
               </li>
@@ -145,31 +136,6 @@ export default function ContractorSubscription() {
               {currentPlan === "standard" ? "Upgrade to Premium" : appliedPromoPremium?.valid ? `Subscribe — $${((appliedPromoPremium.discountedAmount ?? 2500) / 100).toFixed(2)}/week` : "Subscribe — $25/week"}
             </Button>
           )}
-        </div>
-      </div>
-
-      {/* Qualification Upgrade */}
-      <div className="mt-8 max-w-3xl">
-        <h2 className="mb-4 text-lg font-semibold text-foreground">Verified Qualification Badge</h2>
-        <div className="rounded-lg border bg-card p-6 card-shadow">
-          <div className="flex items-start gap-4">
-            <ShieldCheck className="text-primary mt-0.5" size={28} />
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">Get Verified</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Stand out with a Verified Qualification badge. Boost your credibility and rank higher in search results.
-              </p>
-              <p className="mt-2 text-2xl font-bold text-foreground">$20<span className="text-sm font-normal text-muted-foreground">/week</span></p>
-            </div>
-            {subStatus?.hasQualificationUpgrade ? (
-              <Badge className="mt-1">Active</Badge>
-            ) : (
-              <Button type="button" onClick={handleUpgrade} disabled={upgrade.isPending}>
-                {upgrade.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Upgrade
-              </Button>
-            )}
-          </div>
         </div>
       </div>
 

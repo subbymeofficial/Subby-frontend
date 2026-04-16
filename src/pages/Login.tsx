@@ -46,14 +46,11 @@ export default function Login() {
         const userStr = localStorage.getItem("user");
         if (userStr) {
           const userData = JSON.parse(userStr);
-          console.log("User data:", userData); // Debug log
-          console.log("User role:", userData.role); // Debug log
           
           const redirectPath = userData.role === "admin" 
             ? "/admin" 
             : `/dashboard/${userData.role}`;
           
-          console.log("Redirecting to:", redirectPath); // Debug log
           navigate(redirectPath);
         }
       }, 100);

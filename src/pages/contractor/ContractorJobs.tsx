@@ -159,11 +159,6 @@ export default function ContractorJobs() {
     }
     
     try {
-        listingId: normalizedId,
-        coverLetter: applyForm.coverLetter,
-        proposedRate: applyForm.proposedRate ? Number(applyForm.proposedRate) : undefined,
-        proposedTimeline: timelineText || undefined,
-      });
       
       await createApp.mutateAsync({
         listingId: normalizedId,

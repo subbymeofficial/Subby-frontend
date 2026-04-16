@@ -3,13 +3,13 @@ import { RatingStars } from "@/components/RatingStars";
 import { useUserReviews } from "@/hooks/use-api";
 import { useAuth } from "@/context/AuthContext";
 import { contractorNavItems } from "./ContractorOverview";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import type { User } from "@/lib/types";
 
 export default function ContractorReviews() {
   const { user } = useAuth();
   const userId = user?._id || user?.id;
-  const { data, isLoading } = useUserReviews(userId);
+  const { data, isLoading, isError } = useUserReviews(userId);
   const reviews = data?.reviews ?? [];
 
   return (
@@ -23,7 +23,13 @@ export default function ContractorReviews() {
       )}
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-      ) : reviews.length === 0 ? (
+      ) : isError ? (
+      <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center">
+        <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
+        <p className="mt-2 font-medium text-destructive">Failed to load reviews</p>
+        <p className="mt-1 text-sm text-muted-foreground">Please refresh the page and try again.</p>
+      </div>
+    ) : reviews.length === 0 ? (
         <p className="text-muted-foreground">No reviews yet.</p>
       ) : (
         <div className="space-y-4">

@@ -25,8 +25,8 @@ export default function ContractorSettings() {
       toast({ title: "Error", description: "New passwords do not match.", variant: "destructive" });
       return;
     }
-    if (pwForm.newPassword.length < 6) {
-      toast({ title: "Error", description: "Password must be at least 6 characters.", variant: "destructive" });
+    if (pwForm.newPassword.length < 8) {
+      toast({ title: "Error", description: "Password must be at least 8 characters.", variant: "destructive" });
       return;
     }
     try {

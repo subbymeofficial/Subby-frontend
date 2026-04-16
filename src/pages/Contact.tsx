@@ -121,7 +121,7 @@ export default function Contact() {
             We'd love to <span className="text-primary">hear from you.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Whether you're a contractor looking to join, a hirer needing assistance, or a business
+            Whether you're a contractor looking to join, a client needing assistance, or a business
             interested in partnering with SubbyMe, our team is here to help.
           </p>
         </motion.div>

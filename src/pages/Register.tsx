@@ -68,7 +68,7 @@ export default function Register() {
           <div className="text-center">
             <img src="/logo.svg" alt="SubbyMe" className="mx-auto mb-3 h-14 w-14" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
             <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{roleParam === "contractor" ? "Sign up as a Subcontractor" : roleParam === "hirer" ? "Sign up as a Builder / Hirer" : "Join SubbyMe today"}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{roleParam === "contractor" ? "Sign up as a Contractor" : roleParam === "hirer" ? "Sign up as a Client" : "Join SubbyMe today"}</p>
           </div>
 
           <div className="mt-8 space-y-4">

@@ -40,7 +40,6 @@ export default function ContractorJobs() {
     return isUnavail;
   };
 
-  console.log("Unavailable dates:", unavailableDates);
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -61,7 +60,6 @@ export default function ContractorJobs() {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   // Debug: Log listing IDs
-  console.log("Fetched listings:", listings.map(l => ({ id: l._id, title: l.title, idLength: l._id?.length })));
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [applyForm, setApplyForm] = useState({ coverLetter: "", proposedRate: "", proposedTimeline: "" });
@@ -121,7 +119,6 @@ export default function ContractorJobs() {
     if (dateRange?.from) {
       const hasUnavailableDates = [];
       
-      console.log("Validating date range:", { from: dateRange.from, to: dateRange.to });
       
       // If there's a date range (from and to)
       if (dateRange.to) {
@@ -131,7 +128,6 @@ export default function ContractorJobs() {
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
           const currentDate = new Date(d);
           const isUnavail = isDateUnavailable(currentDate);
-          console.log(`Checking date ${format(currentDate, "yyyy-MM-dd")}: unavailable = ${isUnavail}`);
           if (isUnavail) {
             hasUnavailableDates.push(format(currentDate, "MMM dd, yyyy"));
           }
@@ -139,13 +135,11 @@ export default function ContractorJobs() {
       } else {
         // If only a single date is selected, check that date
         const isUnavail = isDateUnavailable(dateRange.from);
-        console.log(`Checking single date ${format(dateRange.from, "yyyy-MM-dd")}: unavailable = ${isUnavail}`);
         if (isUnavail) {
           hasUnavailableDates.push(format(dateRange.from, "MMM dd, yyyy"));
         }
       }
       
-      console.log("Unavailable dates found in selection:", hasUnavailableDates);
       
       if (hasUnavailableDates.length > 0) {
         toast({
@@ -165,7 +159,6 @@ export default function ContractorJobs() {
     }
     
     try {
-      console.log("Submitting application with data:", {
         listingId: normalizedId,
         coverLetter: applyForm.coverLetter,
         proposedRate: applyForm.proposedRate ? Number(applyForm.proposedRate) : undefined,

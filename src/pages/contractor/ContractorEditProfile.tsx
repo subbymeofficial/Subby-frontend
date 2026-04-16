@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,15 +10,15 @@ import { contractorNavItems } from "./ContractorOverview";
 import { useAuth, getApiError } from "@/context/AuthContext";
 import { useUpdateProfile, useToggleAvailability } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, PartyPopper } from "lucide-react";
 import { ProfileImageUpload } from "@/components/ProfileImageUpload";
 import { VerificationDocumentsUpload } from "@/components/VerificationDocumentsUpload";
 
 const TRADE_OPTIONS = [
-  "Electrician", "Plumber", "Carpenter", "Tiler", "Painter",
-  "Roofer", "Concreter", "Plasterer", "Bricklayer", "Landscaper",
-  "HVAC", "Glazier", "Excavator Op.", "Labourer", "Scaffolder",
-  "Welder", "Steel Fixer", "Cabinet Maker", "Waterproofer", "Demolition",
+  "Electrician", "Plumber", "Carpenter", "Tiler", "Painter", "Roofer",
+  "Concreter", "Plasterer", "Bricklayer", "Landscaper", "HVAC", "Glazier",
+  "Excavator Op.", "Labourer", "Scaffolder", "Welder", "Steel Fixer",
+  "Cabinet Maker", "Waterproofer", "Demolition",
 ];
 
 const TICKET_OPTIONS = [
@@ -33,7 +34,6 @@ const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function formatAbn(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 11);
-  // 2-3-3-3 spacing: XX XXX XXX XXX
   const parts = [digits.slice(0,2), digits.slice(2,5), digits.slice(5,8), digits.slice(8,11)].filter(Boolean);
   return parts.join(" ");
 }
@@ -43,6 +43,8 @@ export default function ContractorEditProfile() {
   const updateProfile = useUpdateProfile();
   const toggleAvailability = useToggleAvailability();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const isOnboarding = searchParams.get("onboarding") === "true";
 
   const [form, setForm] = useState({
     name: user?.name || "",
@@ -74,7 +76,6 @@ export default function ContractorEditProfile() {
     e.preventDefault();
     const userId = user?._id || user?.id;
     if (!userId) return;
-
     if (form.abn && !abnValid) {
       toast({ title: "Invalid ABN", description: "ABN must be 11 digits.", variant: "destructive" });
       return;
@@ -83,13 +84,11 @@ export default function ContractorEditProfile() {
       toast({ title: "Pick at least one trade", description: "Select the trades you work in so builders can find you.", variant: "destructive" });
       return;
     }
-
     try {
       await updateProfile.mutateAsync({
         id: userId,
         data: {
           name: form.name,
-          // keep legacy single-trade field in sync with first pick so older UI still works
           trade: form.trades[0] || "",
           trades: form.trades,
           abn: form.abn.replace(/\s/g, ""),
@@ -116,9 +115,7 @@ export default function ContractorEditProfile() {
       await refreshUser();
       toast({
         title: user?.isActive ? "Set to Unavailable" : "Set to Available",
-        description: user?.isActive
-          ? "You won't appear in search results"
-          : "You're now visible to clients",
+        description: user?.isActive ? "You won't appear in search results" : "You're now visible to clients",
       });
     } catch (error) {
       toast({ title: "Error", description: getApiError(error), variant: "destructive" });
@@ -128,15 +125,28 @@ export default function ContractorEditProfile() {
   return (
     <DashboardLayout title="Contractor Dashboard" navItems={contractorNavItems}>
       <div className="max-w-3xl space-y-6">
+
+        {/* Onboarding welcome banner */}
+        {isOnboarding && (
+          <div className="rounded-xl border border-[#2E3192]/30 bg-[#2E3192]/5 p-5 flex items-start gap-4">
+            <PartyPopper className="h-7 w-7 text-[#2E3192] mt-0.5 shrink-0" />
+            <div>
+              <h2 className="font-semibold text-[#2E3192] text-lg">Welcome to SubbyMe!</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Your subscription is active. Complete your profile below so clients can find and hire you.
+                Add your trade, location, a profile photo, and upload your verification documents to get the most out of SubbyMe.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Availability Toggle */}
         <div className="rounded-lg border bg-card p-6 card-shadow">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-foreground">Availability Status</h3>
               <p className="text-sm text-muted-foreground">
-                {user?.isActive
-                  ? "You're available for work and visible in search."
-                  : "You're currently unavailable."}
+                {user?.isActive ? "You're available for work and visible in search." : "You're currently unavailable."}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -158,11 +168,9 @@ export default function ContractorEditProfile() {
         {/* Profile Form */}
         <form onSubmit={handleSubmit} className="rounded-lg border bg-card p-6 card-shadow">
           <h2 className="text-lg font-semibold text-foreground">Edit Profile</h2>
-
           <div className="mt-4">
             <ProfileImageUpload />
           </div>
-
           <div className="mt-6 space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -231,7 +239,10 @@ export default function ContractorEditProfile() {
               </div>
               <div className="space-y-2">
                 <Label>Phone</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
               </div>
             </div>
 
@@ -328,7 +339,12 @@ export default function ContractorEditProfile() {
               </div>
             </div>
 
-            <Button type="submit" disabled={updateProfile.isPending} size="lg" className="bg-[#2E3192] hover:bg-[#1E2270]">
+            <Button
+              type="submit"
+              disabled={updateProfile.isPending}
+              size="lg"
+              className="bg-[#2E3192] hover:bg-[#1E2270]"
+            >
               {updateProfile.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Profile
             </Button>

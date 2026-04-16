@@ -32,7 +32,7 @@ export default function Index() {
           </div>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            The home of trusted subcontractors — free for builders, fair monthly listing for subbies. Built for Australian and American trades.
+            The home of trusted contractors — free for builders, fair monthly listing for subbies. Built for Australian and American trades.
           </p>
 
           {/* Two role cards */}
@@ -42,7 +42,7 @@ export default function Index() {
               <div className="rounded-full bg-primary/10 p-4">
                 <HardHat className="h-8 w-8 text-primary" />
               </div>
-              <h2 className="text-xl font-bold">I'm a Subcontractor</h2>
+              <h2 className="text-xl font-bold">I'm a Contractor</h2>
               <p className="text-sm text-muted-foreground">
                 List your trade and get hired by builders nationwide. Founding-member pricing — first 100 subbies locked in.
               </p>
@@ -61,15 +61,15 @@ export default function Index() {
               <div className="rounded-full bg-primary/10 p-4">
                 <Hammer className="h-8 w-8 text-primary" />
               </div>
-              <h2 className="text-xl font-bold">I'm a Builder / Hirer</h2>
+              <h2 className="text-xl font-bold">I'm a Builder / Client</h2>
               <p className="text-sm text-muted-foreground">
-                Free to join. Find vetted subcontractors fast — message, book and rate after the job.
+                Free to join. Find vetted contractors fast — message, book and rate after the job.
               </p>
               <div className="flex flex-col gap-2 w-full pt-2">
-                <Button size="lg" variant="outline" className="w-full" onClick={() => navigate("/onboarding/country?role=hirer")}>
+                <Button size="lg" variant="outline" className="w-full" onClick={() => navigate("/onboarding/country?role=client")}>
                   Sign up <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Link to="/login?role=hirer" className="text-sm text-muted-foreground hover:text-primary">
+                <Link to="/login?role=client" className="text-sm text-muted-foreground hover:text-primary">
                   Already a member? Sign in
                 </Link>
               </div>

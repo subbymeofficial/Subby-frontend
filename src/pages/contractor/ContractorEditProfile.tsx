@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { contractorNavItems } from "./ContractorOverview";
 import { useAuth, getApiError } from "@/context/AuthContext";
 import { useUpdateProfile, useToggleAvailability } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PartyPopper, Plus, X } from "lucide-react";
+import { Loader2, PartyPopper, Plus, X, Upload } from "lucide-react";
 import { ProfileImageUpload } from "@/components/ProfileImageUpload";
 import { VerificationDocumentsUpload } from "@/components/VerificationDocumentsUpload";
 
@@ -34,23 +34,151 @@ const TRADES_BY_CATEGORY: Record<string, string[]> = {
   "Temping & Freelance": ["Receptionist", "Teacher / Tutor", "Teacher Aide", "Childcare Worker", "Aged Care Worker", "Disability Support Worker", "Registered Nurse", "Enrolled Nurse", "Dental Nurse / Assistant", "Physiotherapist", "Occupational Therapist", "Speech Pathologist", "Accountant", "Bookkeeper", "Legal Secretary", "Paralegal", "Marketing Consultant", "Copywriter", "Virtual Assistant", "Interpreter / Translator", "Real Estate Agent", "Property Manager", "Mortgage Broker", "Insurance Broker", "Warehouse Worker", "Forklift Operator", "Labourer - General", "Night Fill / Shelf Stacker", "Retail Assistant"],
   "Specialty & Other": ["Sign Writer", "Line Marker", "Sandblaster", "Asbestos Removalist", "Diver - Commercial", "Surveyor", "Drafts Person / CAD", "Safety Officer / Advisor", "First Aid Officer"],
 };
-
 const CATEGORY_KEYS = Object.keys(TRADES_BY_CATEGORY);
 
-const TICKET_OPTIONS = [
-  "White Card", "Working at Heights", "Confined Space", "Asbestos Awareness",
-  "First Aid", "EWP Licence", "Forklift Licence", "Traffic Control",
-];
+const TICKETS_BY_CATEGORY: Record<string, string[]> = {
+  "Safety Inductions": [
+    "White Card (General Construction Induction)",
+    "Working at Heights",
+    "Confined Space Entry",
+    "Confined Space Supervisor",
+    "Confined Space Rescue",
+  ],
+  "Crane Licences (HRWL)": [
+    "C1 Open – Slewing Mobile Crane (Unrestricted)",
+    "Slewing Mobile Crane (up to 20t)",
+    "Slewing Mobile Crane (20–100t)",
+    "Slewing Mobile Crane (100t+)",
+    "C6 – Non-Slewing Mobile Crane (up to 3t)",
+    "C2 – Non-Slewing Mobile Crane (over 3t)",
+    "Self-Erecting Tower Crane",
+    "Tower Crane",
+    "Vehicle Loading Crane",
+    "Bridge and Gantry Crane",
+    "Franna / Pick and Carry Crane",
+    "Portal Boom Crane",
+    "Derrick Crane",
+  ],
+  "Rigging & Dogging (HRWL)": [
+    "Dogging (DG)",
+    "Rigging Basic (RB)",
+    "Rigging Intermediate (RI)",
+    "Rigging Advanced (RA)",
+  ],
+  "Scaffolding (HRWL)": [
+    "Scaffolding Basic (SB)",
+    "Scaffolding Intermediate (SI)",
+    "Scaffolding Advanced (SA)",
+  ],
+  "EWP & Forklift (HRWL)": [
+    "Forklift Licence (LF)",
+    "EWP – Boom Type (WP)",
+    "EWP – Scissor Lift / Vertical",
+    "Telehandler Licence",
+  ],
+  "First Aid & Emergency": [
+    "First Aid (HLTAID011)",
+    "CPR Only (HLTAID009)",
+    "Advanced First Aid (HLTAID012)",
+    "Mental Health First Aid",
+    "Emergency Warden",
+    "Fire Extinguisher Training",
+  ],
+  "Asbestos": [
+    "Asbestos Awareness",
+    "Class B – Non-Friable Asbestos Removal",
+    "Class A – Friable Asbestos Removal",
+    "Asbestos Assessor",
+  ],
+  "Traffic Management": [
+    "Traffic Controller (TC)",
+    "Implement Traffic Control Plans",
+    "Prepare Traffic Management Plans",
+  ],
+  "Vehicle Licences": [
+    "MR Licence",
+    "HR Licence",
+    "HC Licence",
+    "MC Licence",
+    "Dangerous Goods (DG)",
+    "Tow Truck Operator Licence",
+  ],
+  "Gas & Plumbing": [
+    "Plumbing Licence",
+    "Gas Fitting Licence",
+    "Drainer's Licence",
+    "Mechanical Services (HVAC) Licence",
+  ],
+  "Electrical": [
+    "Electrical Contractor Licence",
+    "Electrical Worker Licence (A Grade)",
+    "Restricted Electrical Licence",
+    "Solar PV Accreditation (CEC)",
+    "Switchboard Licence",
+  ],
+  "Demolition (HRWL)": [
+    "Demolition – Non-Structural",
+    "Demolition – Structural",
+  ],
+  "Explosive & Pyrotechnics (HRWL)": [
+    "Explosive-Powered Tools (EP)",
+    "Blasting – Surface",
+    "Blasting – Underground",
+    "Pyrotechnics Licence",
+  ],
+  "Pressure Equipment (HRWL)": [
+    "Boiler Operation – Standard",
+    "Boiler Operation – Advanced",
+    "Steam Turbine Operation",
+    "Reciprocating Engine Operation",
+  ],
+  "Security & Compliance": [
+    "Security Licence – Class 1",
+    "Security Licence – Class 2",
+    "RSA (Responsible Service of Alcohol)",
+    "RSG (Responsible Service of Gambling)",
+    "Working with Children Check",
+    "NDIS Worker Screening",
+    "National Police Check",
+  ],
+  "Mining & Resources": [
+    "Surface Extraction Supervisor",
+    "Underground Mining Certification",
+    "Coal Mining (SIMTARS)",
+    "Radiation Safety Licence",
+  ],
+  "General Competencies": [
+    "Manual Handling",
+    "Chemical Handling / Hazmat",
+    "Noise Awareness",
+    "Food Safety Supervisor",
+    "VOC – Site Specific Competency",
+    "Lead Awareness",
+  ],
+};
+const TICKET_CATEGORY_KEYS = Object.keys(TICKETS_BY_CATEGORY);
 
 const INSURANCE_OPTIONS = [
-  "Public Liability", "Workers Comp", "Tools Insurance", "Vehicle Insurance",
+  "Public Liability",
+  "Workers Comp",
+  "Tools Insurance",
+  "Vehicle Insurance",
 ];
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+type TicketEntry = {
+  id: string;
+  name: string;
+  expiry: string;
+  photoDataUrl: string;
+};
+
+const genId = () => Math.random().toString(36).slice(2, 10);
+
 function formatAbn(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 11);
-  const parts = [digits.slice(0,2), digits.slice(2,5), digits.slice(5,8), digits.slice(8,11)].filter(Boolean);
+  const parts = [digits.slice(0, 2), digits.slice(2, 5), digits.slice(5, 8), digits.slice(8, 11)].filter(Boolean);
   return parts.join(" ");
 }
 
@@ -71,15 +199,36 @@ export default function ContractorEditProfile() {
     bio: user?.bio || "",
     skills: user?.skills?.join(", ") || "",
     phone: user?.phone || "",
-    tickets: (user as any)?.tickets || [] as string[],
     insurance: (user as any)?.insurance || [] as string[],
     availableDays: (user as any)?.availableDays || [] as string[],
   });
 
+  // Ticket entries (separate from form — richer structure with expiry + photo)
+  const [ticketEntries, setTicketEntries] = useState<TicketEntry[]>(() => {
+    const raw = (user as any)?.tickets ?? [];
+    return (raw as unknown[]).map((t): TicketEntry => {
+      if (typeof t === "object" && t !== null && "name" in (t as object)) {
+        const obj = t as Record<string, string>;
+        return { id: genId(), name: obj.name ?? "", expiry: obj.expiry ?? "", photoDataUrl: obj.photoDataUrl ?? "" };
+      }
+      return { id: genId(), name: String(t), expiry: "", photoDataUrl: "" };
+    });
+  });
+
+  // Ticket picker state
+  const [ticketMode, setTicketMode] = useState<"list" | "other">("list");
+  const [ticketCat, setTicketCat] = useState("");
+  const [ticketName, setTicketName] = useState("");
+  const [ticketOther, setTicketOther] = useState("");
+  const [ticketExpiry, setTicketExpiry] = useState("");
+  const [ticketPhoto, setTicketPhoto] = useState("");
+  const ticketPhotoRef = useRef<HTMLInputElement>(null);
+
+  // Trade picker state
   const [pickerCategory, setPickerCategory] = useState("");
   const [pickerSpecialisation, setPickerSpecialisation] = useState("");
 
-  const toggleInArray = (key: "tickets" | "insurance" | "availableDays", value: string) => {
+  const toggleInArray = (key: "insurance" | "availableDays", value: string) => {
     setForm((f) => {
       const list = f[key] as string[];
       return { ...f, [key]: list.includes(value) ? list.filter((x) => x !== value) : [...list, value] };
@@ -102,6 +251,34 @@ export default function ContractorEditProfile() {
     setForm((f) => ({ ...f, trades: f.trades.filter((t) => t !== trade) }));
   };
 
+  const addTicket = () => {
+    const name = ticketMode === "other" ? ticketOther.trim() : ticketName;
+    if (!name) return;
+    if (ticketEntries.some((t) => t.name === name)) {
+      toast({ title: "Already added", description: "That ticket is already in your list.", variant: "destructive" });
+      return;
+    }
+    setTicketEntries((prev) => [...prev, { id: genId(), name, expiry: ticketExpiry, photoDataUrl: ticketPhoto }]);
+    setTicketCat("");
+    setTicketName("");
+    setTicketOther("");
+    setTicketExpiry("");
+    setTicketPhoto("");
+    if (ticketPhotoRef.current) ticketPhotoRef.current.value = "";
+  };
+
+  const removeTicket = (id: string) => {
+    setTicketEntries((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const handleTicketPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setTicketPhoto((ev.target?.result as string) ?? "");
+    reader.readAsDataURL(file);
+  };
+
   const abnValid = form.abn.replace(/\s/g, "").length === 11;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,7 +294,6 @@ export default function ContractorEditProfile() {
       return;
     }
     try {
-      // Derive a legacy single-trade field from the first entry for backward compat
       const primaryTrade = form.trades[0]?.split(" > ").pop() || form.trades[0] || "";
       await updateProfile.mutateAsync({
         id: userId,
@@ -131,7 +307,7 @@ export default function ContractorEditProfile() {
           bio: form.bio,
           skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
           phone: form.phone,
-          tickets: form.tickets,
+          tickets: ticketEntries.map((t) => ({ name: t.name, expiry: t.expiry, photoDataUrl: t.photoDataUrl })),
           insurance: form.insurance,
           availableDays: form.availableDays,
         } as any,
@@ -159,7 +335,6 @@ export default function ContractorEditProfile() {
   return (
     <DashboardLayout title="Contractor Dashboard" navItems={contractorNavItems}>
       <div className="max-w-3xl space-y-6">
-
         {/* Onboarding welcome banner */}
         {isOnboarding && (
           <div className="rounded-xl border border-[#2E3192]/30 bg-[#2E3192]/5 p-5 flex items-start gap-4">
@@ -205,8 +380,8 @@ export default function ContractorEditProfile() {
           <div className="mt-4">
             <ProfileImageUpload />
           </div>
-          <div className="mt-6 space-y-6">
 
+          <div className="mt-6 space-y-6">
             {/* Name + ABN */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -228,8 +403,6 @@ export default function ContractorEditProfile() {
             {/* Trades */}
             <div className="space-y-3">
               <Label>Trades <span className="text-xs text-muted-foreground">(add one or more)</span></Label>
-
-              {/* Selected trade chips */}
               {form.trades.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {form.trades.map((trade) => (
@@ -250,8 +423,6 @@ export default function ContractorEditProfile() {
                   ))}
                 </div>
               )}
-
-              {/* Category + Specialisation picker */}
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
@@ -276,10 +447,9 @@ export default function ContractorEditProfile() {
                       className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E3192]/40 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <option value="">Select specialisation...</option>
-                      {pickerCategory &&
-                        TRADES_BY_CATEGORY[pickerCategory]?.map((spec) => (
-                          <option key={spec} value={spec}>{spec}</option>
-                        ))}
+                      {pickerCategory && TRADES_BY_CATEGORY[pickerCategory]?.map((spec) => (
+                        <option key={spec} value={spec}>{spec}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -294,7 +464,6 @@ export default function ContractorEditProfile() {
                   {form.trades.length === 0 ? "Add trade" : "Add another trade"}
                 </Button>
               </div>
-
               {form.trades.length === 0 && (
                 <p className="text-xs text-destructive">Add at least one trade to continue.</p>
               )}
@@ -347,25 +516,164 @@ export default function ContractorEditProfile() {
               />
             </div>
 
-            {/* Tickets */}
-            <div className="space-y-2">
-              <Label>Tickets &amp; certifications</Label>
-              <div className="flex flex-wrap gap-2">
-                {TICKET_OPTIONS.map((t) => {
-                  const active = form.tickets.includes(t);
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => toggleInArray("tickets", t)}
-                      className={`rounded-full border px-3 py-1.5 text-sm transition ${
-                        active ? "bg-[#FBBF24] text-slate-900 border-[#FBBF24]" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
-                      }`}
+            {/* Tickets & Certifications */}
+            <div className="space-y-3">
+              <Label>Tickets &amp; Certifications</Label>
+
+              {/* Added ticket cards */}
+              {ticketEntries.length > 0 && (
+                <div className="space-y-2">
+                  {ticketEntries.map((ticket) => (
+                    <div
+                      key={ticket.id}
+                      className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3"
                     >
-                      {t}
-                    </button>
-                  );
-                })}
+                      {ticket.photoDataUrl && (
+                        <img
+                          src={ticket.photoDataUrl}
+                          alt="Ticket"
+                          className="h-12 w-12 rounded object-cover shrink-0 border border-amber-200"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm text-slate-800 leading-tight">{ticket.name}</p>
+                        {ticket.expiry && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Expires: {ticket.expiry}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeTicket(ticket.id)}
+                        className="rounded-full p-0.5 hover:bg-amber-200 transition shrink-0"
+                        aria-label={`Remove ${ticket.name}`}
+                      >
+                        <X className="h-3.5 w-3.5 text-amber-700" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Ticket picker */}
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3">
+                {/* Mode toggle */}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setTicketMode("list"); setTicketOther(""); }}
+                    className={`rounded-full px-3 py-1 text-xs font-medium border transition ${
+                      ticketMode === "list"
+                        ? "bg-[#2E3192] text-white border-[#2E3192]"
+                        : "bg-white text-slate-600 border-slate-300 hover:border-slate-400"
+                    }`}
+                  >
+                    Select from list
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setTicketMode("other"); setTicketCat(""); setTicketName(""); }}
+                    className={`rounded-full px-3 py-1 text-xs font-medium border transition ${
+                      ticketMode === "other"
+                        ? "bg-[#2E3192] text-white border-[#2E3192]"
+                        : "bg-white text-slate-600 border-slate-300 hover:border-slate-400"
+                    }`}
+                  >
+                    Other (not listed)
+                  </button>
+                </div>
+
+                {ticketMode === "list" ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Category</label>
+                      <select
+                        value={ticketCat}
+                        onChange={(e) => { setTicketCat(e.target.value); setTicketName(""); }}
+                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E3192]/40"
+                      >
+                        <option value="">Select category...</option>
+                        {TICKET_CATEGORY_KEYS.map((cat) => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ticket</label>
+                      <select
+                        value={ticketName}
+                        onChange={(e) => setTicketName(e.target.value)}
+                        disabled={!ticketCat}
+                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E3192]/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <option value="">Select ticket...</option>
+                        {ticketCat && TICKETS_BY_CATEGORY[ticketCat]?.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ticket name</label>
+                    <Input
+                      value={ticketOther}
+                      onChange={(e) => setTicketOther(e.target.value)}
+                      placeholder="e.g. Rigging Advanced – Special Class"
+                    />
+                  </div>
+                )}
+
+                {/* Expiry + Photo */}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Expiry date <span className="text-slate-400 font-normal normal-case">(optional)</span>
+                    </label>
+                    <Input
+                      type="date"
+                      value={ticketExpiry}
+                      onChange={(e) => setTicketExpiry(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Photo of ticket <span className="text-slate-400 font-normal normal-case">(optional)</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={ticketPhotoRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleTicketPhoto}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => ticketPhotoRef.current?.click()}
+                        className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 hover:border-slate-400 transition"
+                      >
+                        <Upload className="h-3.5 w-3.5" />
+                        {ticketPhoto ? "Change photo" : "Upload photo"}
+                      </button>
+                      {ticketPhoto && (
+                        <img src={ticketPhoto} alt="preview" className="h-8 w-8 rounded object-cover border" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={addTicket}
+                  disabled={ticketMode === "list" ? (!ticketCat || !ticketName) : !ticketOther.trim()}
+                  className="bg-[#2E3192] hover:bg-[#1E2270] disabled:opacity-40"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  {ticketEntries.length === 0 ? "Add ticket" : "Add another ticket"}
+                </Button>
               </div>
             </div>
 
@@ -381,7 +689,9 @@ export default function ContractorEditProfile() {
                       type="button"
                       onClick={() => toggleInArray("insurance", t)}
                       className={`rounded-full border px-3 py-1.5 text-sm transition ${
-                        active ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
+                        active
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                       }`}
                     >
                       {t}
@@ -403,7 +713,9 @@ export default function ContractorEditProfile() {
                       type="button"
                       onClick={() => toggleInArray("availableDays", d)}
                       className={`rounded-md border px-4 py-2 text-sm font-medium transition ${
-                        active ? "bg-[#2E3192] text-white border-[#2E3192]" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
+                        active
+                          ? "bg-[#2E3192] text-white border-[#2E3192]"
+                          : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                       }`}
                     >
                       {d}

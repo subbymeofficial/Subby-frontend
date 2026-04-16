@@ -63,7 +63,7 @@ export default function ClientSubscription() {
           )}
           <h3 className="text-xl font-bold text-foreground">Client Plan</h3>
           <p className="mt-1 text-3xl font-bold text-primary">$10<span className="text-base font-normal text-muted-foreground">/week</span></p>
-          <p className="mt-1 text-xs text-muted-foreground">First 2 weeks free!</p>
+          <p className="mt-1 text-xs text-muted-foreground">First year free — founding member!</p>
           <p className="mt-2 text-sm text-muted-foreground">Post jobs and hire verified contractors.</p>
           <ul className="mt-4 space-y-2">
             {["Post job listings", "Receive contractor applications", "Pay for completed jobs (escrow)", "Message contractors", "Leave reviews"].map((f) => (

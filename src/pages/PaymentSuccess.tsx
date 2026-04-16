@@ -77,7 +77,7 @@ export default function PaymentSuccess() {
           )}
           <div className="mt-6 flex flex-col gap-2">
             <Button asChild>
-              <Link to="/dashboard/contractor/subscription">View Subscription</Link>
+              <Link to={user?.role === 'contractor' ? '/dashboard/contractor/subscription' : '/dashboard/client'}>View Subscription</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/">Back to Home</Link>

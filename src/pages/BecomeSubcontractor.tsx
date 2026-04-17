@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { addContractorRole } from '../services/users.service';
+import { usersService } from '../services/users.service';
 
 /**
  * Upgrade flow: a Builder (client) converts their existing account into a
@@ -42,14 +42,21 @@ export function BecomeSubcontractor() {
     }
     setSubmitting(true);
     try {
-      const { checkoutUrl } = await addContractorRole({
-        trade: trade.trim(),
-        subtrade: subtrade.trim() || undefined,
-        location: location.trim(),
-        hourlyRate: Number(hourlyRate),
+      const { url } = await usersService.addContractorRole({
+        successUrl: window.location.origin + '/dashboard/contractor?upgraded=1',
+        cancelUrl: window.location.origin + '/become-subcontractor?canceled=1',
       });
-      if (!checkoutUrl) throw new Error('No checkout URL returned');
-      window.location.assign(checkoutUrl);
+      if (!url) throw new Error('No checkout URL returned');
+      // Persist onboarding profile details locally so the contractor dashboard can pick them up after return.
+      try {
+        localStorage.setItem('pendingContractorProfile', JSON.stringify({
+          trade: trade.trim(),
+          subtrade: subtrade.trim() || undefined,
+          location: location.trim(),
+          hourlyRate: Number(hourlyRate),
+        }));
+      } catch {}
+      window.location.assign(url);
     } catch (e: any) {
       setErr(e?.message || 'Could not start checkout. Please try again.');
       setSubmitting(false);

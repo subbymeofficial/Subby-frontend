@@ -17,6 +17,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
+import BecomeSubcontractor from "./pages/BecomeSubcontractor";
 import Contact from "./pages/Contact";
 import ClientOverview from "./pages/client/ClientOverview";
 import ClientSubscription from "./pages/client/ClientSubscription";
@@ -80,6 +81,7 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/payment/success" element={<PaymentSuccess />} />
+              <Route path="/become-subcontractor" element={<ProtectedRoute><BecomeSubcontractor /></ProtectedRoute>} />
                 <Route path="/payment/cancel" element={<PaymentCancel />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/messages" element={<ProtectedRoute allowedRoles={["client", "contractor"]}><Messages /></ProtectedRoute>} />

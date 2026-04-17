@@ -65,4 +65,18 @@ export const usersService = {
   async deleteSelf(): Promise<void> {
     await apiClient.delete("/users/me");
   },
+  async switchRole(role: "CLIENT" | "CONTRACTOR"): Promise<{ activeRole: string; roles: string[] }> {
+    const res = await apiClient.post("/users/me/switch-role", { role });
+    return unwrap(res);
+  },
+
+  async updateAvailability(data: { isAvailable?: boolean; busyDates?: string[] }): Promise<{ isAvailable: boolean; busyDates: string[] }> {
+    const res = await apiClient.patch("/users/me/availability", data);
+    return unwrap(res);
+  },
+
+  async addContractorRole(body: { successUrl?: string; cancelUrl?: string; plan?: string } = {}): Promise<{ url: string; sessionId: string }> {
+    const res = await apiClient.post("/users/me/add-contractor-role", body);
+    return unwrap(res);
+  },
 };

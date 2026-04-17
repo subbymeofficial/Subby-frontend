@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "./ui/button";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { MarketToggle } from "./MarketToggle";
+import { RoleSwitcher } from "./RoleSwitcher";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -47,7 +48,8 @@ export function Navbar() {
               <MarketToggle />
           <NotificationDropdown />
               <Button asChild variant="ghost" size="sm">
-                <Link to={dashboardPath}><User size={16} className="mr-1" /> Dashboard</Link>
+                <RoleSwitcher />
+              <Link to={dashboardPath}><User size={16} className="mr-1" /> Dashboard</Link>
               </Button>
               <span className="text-sm text-black">{user.name}</span>
               <Button variant="outline" size="sm" onClick={logout}>
@@ -82,7 +84,8 @@ export function Navbar() {
                   <MessageSquare size={16} /> Messages
                 </Link>
                 <div className="px-3 py-2"><NotificationDropdown /></div>
-                <Link to={dashboardPath} onClick={() => setMobileOpen(false)} className="text-sm font-medium px-3 py-2 rounded-md text-black hover:bg-primary/10">Dashboard</Link>
+                <div className="py-2"><RoleSwitcher /></div>
+              <Link to={dashboardPath} onClick={() => setMobileOpen(false)} className="text-sm font-medium px-3 py-2 rounded-md text-black hover:bg-primary/10">Dashboard</Link>
                 <Button variant="outline" size="sm" onClick={() => { logout(); setMobileOpen(false); }}>Logout</Button>
               </>
             ) : (

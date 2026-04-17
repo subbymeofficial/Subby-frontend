@@ -35,6 +35,51 @@ export default function Index() {
           </div>
         </section>
 
+        {/* Role cards */}
+        <section className="py-14 px-6">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-center text-foreground mb-8">Get started today</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Contractor */}
+              <div className="rounded-2xl border bg-card p-8 shadow-sm hover:shadow-md transition flex flex-col items-center text-center gap-4">
+                <div className="rounded-full bg-primary/10 p-4">
+                  <HardHat className="h-8 w-8 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold">I'm a Contractor</h2>
+                <p className="text-sm text-muted-foreground">
+                  List your trade and get hired by builders. Founding-member pricing — first 100 subbies locked in forever.
+                </p>
+                <div className="flex flex-col gap-2 w-full pt-2">
+                  <Button size="lg" className="w-full" onClick={() => navigate("/onboarding/country?role=contractor")}>
+                    Sign up <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <Link to="/login?role=contractor" className="text-sm text-muted-foreground hover:text-primary">
+                    Already a member? Sign in
+                  </Link>
+                </div>
+              </div>
+
+              {/* Builder */}
+              <div className="rounded-2xl border bg-card p-8 shadow-sm hover:shadow-md transition flex flex-col items-center text-center gap-4">
+                <div className="rounded-full bg-primary/10 p-4">
+                  <Hammer className="h-8 w-8 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold">I'm a Builder / Client</h2>
+                <p className="text-sm text-muted-foreground">
+                  Free to join. Find vetted contractors fast — message, book, and rate after the job.
+                </p>
+                <div className="flex flex-col gap-2 w-full pt-2">
+                  <Button size="lg" variant="outline" className="w-full" onClick={() => navigate("/onboarding/country?role=client")}>
+                    Sign up free <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <Link to="/login?role=client" className="text-sm text-muted-foreground hover:text-primary">
+                    Already a member? Sign in
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
         {/* How it works */}
         <section className="py-14 bg-muted/40 px-6">
           <div className="max-w-4xl mx-auto">
@@ -107,51 +152,6 @@ export default function Index() {
           </div>
         </section>
 
-        {/* Role cards */}
-        <section className="py-14 px-6">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-center text-foreground mb-8">Get started today</h2>
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Contractor */}
-              <div className="rounded-2xl border bg-card p-8 shadow-sm hover:shadow-md transition flex flex-col items-center text-center gap-4">
-                <div className="rounded-full bg-primary/10 p-4">
-                  <HardHat className="h-8 w-8 text-primary" />
-                </div>
-                <h2 className="text-xl font-bold">I'm a Contractor</h2>
-                <p className="text-sm text-muted-foreground">
-                  List your trade and get hired by builders. Founding-member pricing — first 100 subbies locked in forever.
-                </p>
-                <div className="flex flex-col gap-2 w-full pt-2">
-                  <Button size="lg" className="w-full" onClick={() => navigate("/onboarding/country?role=contractor")}>
-                    Sign up <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Link to="/login?role=contractor" className="text-sm text-muted-foreground hover:text-primary">
-                    Already a member? Sign in
-                  </Link>
-                </div>
-              </div>
-
-              {/* Builder */}
-              <div className="rounded-2xl border bg-card p-8 shadow-sm hover:shadow-md transition flex flex-col items-center text-center gap-4">
-                <div className="rounded-full bg-primary/10 p-4">
-                  <Hammer className="h-8 w-8 text-primary" />
-                </div>
-                <h2 className="text-xl font-bold">I'm a Builder / Client</h2>
-                <p className="text-sm text-muted-foreground">
-                  Free to join. Find vetted contractors fast — message, book, and rate after the job.
-                </p>
-                <div className="flex flex-col gap-2 w-full pt-2">
-                  <Button size="lg" variant="outline" className="w-full" onClick={() => navigate("/onboarding/country?role=client")}>
-                    Sign up free <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Link to="/login?role=client" className="text-sm text-muted-foreground hover:text-primary">
-                    Already a member? Sign in
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <footer className="px-6 py-6 text-center text-xs text-muted-foreground border-t">

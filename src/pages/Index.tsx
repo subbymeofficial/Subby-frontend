@@ -9,14 +9,12 @@ export default function Index() {
       {/* Top bar */}
       <header className="px-6 py-4 flex items-center justify-between max-w-6xl mx-auto w-full">
         <span className="font-bold text-lg text-foreground">SubbyMe</span>
-        <div className="flex items-center gap-4">
-          <Link to="/contractors" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors hidden sm:block">
-            Find Contractors
-          </Link>
-          <Link to="/login" className="text-sm font-medium text-primary hover:underline">
-            Sign in
-          </Link>
-        </div>
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
+        >
+          Log back in
+        </Link>
       </header>
 
       <main className="flex-1 flex flex-col">

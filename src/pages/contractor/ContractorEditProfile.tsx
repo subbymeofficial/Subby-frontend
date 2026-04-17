@@ -50,7 +50,7 @@ const US_TRADES: Record<string, string[]> = {
   "Landscaping & Outdoor": ["Landscaper", "Lawn Care / Turf Specialist", "Arborist / Tree Surgeon", "Paving Specialist", "Retaining Wall Builder", "Irrigation Installer", "Pool Builder", "Deck Builder", "Fence Installer"],
   "Cleaning Services": ["Commercial Cleaner", "Residential Cleaner", "Window Cleaner", "Carpet Cleaner", "Pressure Washer", "Post-Construction Cleaner", "Industrial Cleaner"],
   "Home Services": ["Handyman", "Locksmith", "Pest Control Technician", "Appliance Repair Technician", "Blind & Curtain Installer", "Garage Door Technician", "Smart Home Installer", "Mobile Mechanic"],
-  "IT & Technology": ["IT Support Technician", "Network Cabling Installer", "CCTV / Security Installer", "AV Installer", "Web Developer / Designer", Graphic Designer"],
+  "IT & Technology": ["IT Support Technician", "Network Cabling Installer", "CCTV / Security Installer", "AV Installer", "Web Developer / Designer", "Graphic Designer"],
   "Transport & Logistics": ["Courier / Delivery Driver", "Moving / Relocation Specialist", "Tow Truck Operator", "Truck Driver – Class A CDL", "Truck Driver – Class B CDL", "Hazmat Driver"],
   "Hospitality & Events": ["Chef / Cook", "Bartender", "Server / Wait Staff", "Event Setup Crew", "Catering Staff", "DJ / Sound Technician", "Security Guard", "Barista"],
   "Personal Services": ["Barber", "Hair Stylist", "Esthetician", "Nail Technician", "Massage Therapist", "Dog Groomer", "Personal Trainer", "Photographer", "Videographer"],

@@ -1,21 +1,9 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Hammer, HardHat, ArrowRight, Search, MessageSquare, Star, Users } from "lucide-react";
 
 export default function Index() {
   const navigate = useNavigate();
-  const [searchTrade, setSearchTrade] = useState("");
-  const [searchLocation, setSearchLocation] = useState("");
-
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (searchTrade.trim()) params.set("category", searchTrade.trim());
-    if (searchLocation.trim()) params.set("location", searchLocation.trim());
-    navigate(`/contractors?${params.toString()}`);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted flex flex-col">
       {/* Top bar */}
@@ -46,26 +34,6 @@ export default function Index() {
               Built for Australian and American trades.
             </p>
 
-            {/* Search bar */}
-            <div className="bg-card rounded-2xl shadow-md border p-4 flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto w-full">
-              <Input
-                placeholder="Trade e.g. Electrician, Welder, Scaffolder…"
-                value={searchTrade}
-                onChange={(e) => setSearchTrade(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="flex-1"
-              />
-              <Input
-                placeholder="Location e.g. Sydney NSW"
-                value={searchLocation}
-                onChange={(e) => setSearchLocation(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="sm:w-44"
-              />
-              <Button onClick={handleSearch} className="shrink-0">
-                <Search className="mr-2 h-4 w-4" /> Find
-              </Button>
-            </div>
           </div>
         </section>
 

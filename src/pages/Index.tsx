@@ -45,7 +45,7 @@ export default function Index() {
                 <div className="rounded-full bg-primary/10 p-4">
                   <HardHat className="h-8 w-8 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold">I'm a Contractor</h2>
+                <h2 className="text-xl font-bold">I'm a Subcontractor</h2>
                 <p className="text-sm text-muted-foreground">
                   List your trade and get hired by builders. Founding-member pricing — first 100 subbies locked in forever.
                 </p>

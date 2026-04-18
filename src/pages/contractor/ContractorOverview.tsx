@@ -11,6 +11,7 @@ import {
 } from "@/hooks/use-api";
 import { Link } from "react-router-dom";
 import type { Listing } from "@/lib/types";
+import ProfileCompletionBanner from "@/components/ProfileCompletionBanner";
 
 const navItems = [
   { label: "Overview", path: "/dashboard/contractor", icon: LayoutDashboard },
@@ -43,6 +44,8 @@ export default function ContractorOverview() {
 
   return (
     <DashboardLayout title="Contractor Dashboard" navItems={navItems}>
+      <ProfileCompletionBanner />
+
       {/* Subscription Banner */}
       {!subActive && (
         <div className="mb-6 rounded-lg border border-yellow-500/30 bg-yellow-50/50 dark:bg-yellow-900/10 p-4 flex items-center justify-between">

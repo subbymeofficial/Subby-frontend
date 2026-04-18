@@ -92,8 +92,7 @@ export default function AdminVerifications() {
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[2fr,3fr]">
-          <div className="overflow-x-auto rounded-lg border bg-card card-shadow">
+        <div className="overflow-x-auto rounded-lg border bg-card card-shadow">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-secondary">
@@ -132,12 +131,19 @@ export default function AdminVerifications() {
               </tbody>
             </table>
           </div>
+      )}
 
-          <div className="rounded-lg border bg-card p-4 card-shadow">
-            <h3 className="font-semibold text-foreground mb-2">Verification Documents</h3>
-            {!selectedUserId ? (
-              <p className="text-sm text-muted-foreground">Select a contractor to view their verification documents.</p>
-            ) : !docs ? (
+      <Dialog
+        open={!!selectedUserId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedUserId(null);
+        }}
+      >
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Verification Documents</DialogTitle>
+          </DialogHeader>
+          {!docs ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
@@ -213,10 +219,9 @@ export default function AdminVerifications() {
                   );
                 })}
               </div>
-            )}
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={!!viewDoc}

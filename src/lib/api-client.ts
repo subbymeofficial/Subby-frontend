@@ -23,29 +23,55 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // No config means we can't retry â just bubble up
+    if (!originalRequest) return Promise.reject(error);
+
+    // Do not attempt refresh on the refresh endpoint itself to avoid loops
+    const isAuthEndpoint =
+      typeof originalRequest.url === "string" &&
+      (originalRequest.url.includes("/auth/refresh") ||
+        originalRequest.url.includes("/auth/login"));
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint
+    ) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem("refreshToken");
 
       if (refreshToken) {
         try {
-          const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
-          });
+          const { data } = await axios.post(
+            `${API_BASE_URL}/auth/refresh`,
+            { refreshToken },
+          );
 
-          const tokens = data.data || data;
-          localStorage.setItem("accessToken", tokens.accessToken);
-          if (tokens.refreshToken) {
-            localStorage.setItem("refreshToken", tokens.refreshToken);
+          const tokens = data?.data ?? data;
+          const newAccess = tokens?.accessToken ?? tokens?.access_token;
+          const newRefresh = tokens?.refreshToken ?? tokens?.refresh_token;
+
+          if (newAccess) {
+            localStorage.setItem("accessToken", newAccess);
+            if (newRefresh) localStorage.setItem("refreshToken", newRefresh);
+            originalRequest.headers = originalRequest.headers ?? {};
+            originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+            return apiClient(originalRequest);
           }
-
-          originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
-          return apiClient(originalRequest);
-        } catch {
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          localStorage.removeItem("user");
-          window.location.href = "/login";
+        } catch (refreshErr: unknown) {
+          // Only nuke auth if the refresh endpoint itself explicitly
+          // rejected the token. Network errors, 5xx, CORS failures etc.
+          // should NOT log the user out.
+          const status =
+            (refreshErr as { response?: { status?: number } })?.response?.status;
+          if (status === 401 || status === 403) {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("user");
+            // Let the app react via AuthContext instead of a hard reload.
+            window.dispatchEvent(new Event("auth:expired"));
+          }
+          // Otherwise: keep the user signed in, just reject this one call.
         }
       }
     }

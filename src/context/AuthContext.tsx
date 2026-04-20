@@ -16,6 +16,7 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
+  switchRole: (target: "client" | "contractor") => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,12 +53,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       const profile = await authService.getProfile();
-      const fullUser = await usersService.getUserById(profile.sub ?? (profile as unknown as { _id: string })._id ?? (profile as unknown as { id: string }).id);
+      const id =
+        (profile as unknown as { sub?: string }).sub ??
+        (profile as unknown as { _id: string })._id ??
+        (profile as unknown as { id: string }).id;
+
+      let fullUser: User = profile as unknown as User;
+      try {
+        fullUser = await usersService.getUserById(id);
+      } catch (innerErr) {
+        // getUserById can fail for transient reasons (rate-limit, 5xx,
+        // caching). Do NOT log the user out on this path â we still
+        // have a valid profile from /auth/me.
+        console.warn("getUserById failed, using profile fallback", innerErr);
+      }
+
       setUser(fullUser);
       localStorage.setItem("user", JSON.stringify(fullUser));
-    } catch {
-      clearAuth();
-      setUser(null);
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      // Only clear auth on explicit auth failures.
+      if (status === 401 || status === 403) {
+        clearAuth();
+        setUser(null);
+      } else {
+        // Transient failure â keep whatever user we already have cached.
+        console.warn("refreshUser transient failure, keeping cached user", err);
+      }
     } finally {
       setLoading(false);
     }
@@ -79,6 +101,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshUser();
     }
   }, [refreshUser]);
+
+  // Listen for the api-client's hard-eviction event so we don't have to
+  // hard-reload the page to log a user out when the refresh endpoint 401s.
+  useEffect(() => {
+    const onExpired = () => {
+      clearAuth();
+      setUser(null);
+    };
+    window.addEventListener("auth:expired", onExpired);
+    return () => window.removeEventListener("auth:expired", onExpired);
+  }, []);
 
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
@@ -105,6 +138,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const switchRole = useCallback(
+    (target: "client" | "contractor") => {
+      if (!user) return;
+      // Optimistic local flip; backend role is unchanged â this is just a view mode.
+      const next = { ...user, activeView: target };
+      setUser(next);
+      localStorage.setItem("user", JSON.stringify(next));
+    },
+    [user],
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -117,6 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         isAuthenticated: !!user,
         refreshUser,
+        switchRole,
       }}
     >
       {children}
@@ -137,6 +182,6 @@ export function getApiError(error: unknown): string {
     if (typeof msg === "string") return msg;
     return error.message;
   }
-  if (error instanceof Error) return error.message;
+  if (error instanceof Error) return "An unexpected error occurred";
   return "An unexpected error occurred";
 }

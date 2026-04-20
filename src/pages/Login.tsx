@@ -18,6 +18,14 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // If already signed in, skip the form and go to the dashboard.
+  useEffect(() => {
+    if (user) {
+      const dashPath = user.role === "admin" ? "/admin" : `/dashboard/${user.role}`;
+      navigate(dashPath, { replace: true });
+    }
+  }, [user, navigate]);
+
   // Check for error in URL (from Google OAuth redirect)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -106,7 +114,7 @@ export default function Login() {
               <div className="relative">
                 <Input 
                   type={showPassword ? "text" : "password"} 
-                  placeholder="••••••••" 
+                  placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
                   required 

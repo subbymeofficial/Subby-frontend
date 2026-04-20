@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { usersService } from '../services/users.service';
 
 /**
@@ -23,6 +23,7 @@ export function BecomeSubcontractor() {
   const [subtrade, setSubtrade] = useState('');
   const [location, setLocation] = useState('');
   const [hourlyRate, setHourlyRate] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -38,6 +39,10 @@ export function BecomeSubcontractor() {
     setErr(null);
     if (!trade.trim() || !location.trim() || !hourlyRate.trim()) {
       setErr('Please fill in trade, location and hourly rate.');
+      return;
+    }
+    if (!acceptTerms) {
+      setErr('Please agree to the Subscription Terms to continue.');
       return;
     }
     setSubmitting(true);
@@ -66,10 +71,27 @@ export function BecomeSubcontractor() {
   return (
     <div style={{ maxWidth: 560, margin: '40px auto', padding: 24 }}>
       <h1 style={{ fontSize: 28, marginBottom: 4 }}>Become a Subcontractor</h1>
-      <p style={{ color: '#475569', marginBottom: 24 }}>
+      <p style={{ color: '#475569', marginBottom: 16 }}>
         Add the Subcontractor mode to your account to get discovered by Builders. You can
         switch between Builder and Subcontractor any time from the top nav.
       </p>
+
+      <div style={paywallBoxStyle}>
+        <p style={{ fontWeight: 700, margin: 0, color: '#92400e' }}>
+          Subcontractor subscription â $9.99 AUD / week
+        </p>
+        <ul style={{ margin: '8px 0 0 20px', padding: 0, color: '#78350f', fontSize: 14, lineHeight: 1.5 }}>
+          <li>Billed weekly via Stripe, auto-renews until you cancel.</li>
+          <li>Cancel anytime from your dashboard â access continues until the end of the paid week.</li>
+          <li>No refunds for partial weeks.</li>
+          <li>
+            Full details:{' '}
+            <Link to="/terms" target="_blank" style={{ color: '#92400e', textDecoration: 'underline' }}>Terms of Service</Link>
+            {' Â· '}
+            <Link to="/privacy" target="_blank" style={{ color: '#92400e', textDecoration: 'underline' }}>Privacy Policy</Link>
+          </li>
+        </ul>
+      </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <label>
@@ -118,15 +140,31 @@ export function BecomeSubcontractor() {
           />
         </label>
 
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#334155' }}>
+          <input
+            type="checkbox"
+            checked={acceptTerms}
+            onChange={(e) => setAcceptTerms(e.target.checked)}
+            style={{ marginTop: 3 }}
+          />
+          <span>
+            I agree to the{' '}
+            <Link to="/terms" target="_blank" style={{ color: '#0ea5e9' }}>Subscription Terms</Link>
+            {' and '}
+            <Link to="/privacy" target="_blank" style={{ color: '#0ea5e9' }}>Privacy Policy</Link>, and I understand my card will be
+            charged $9.99 AUD weekly until I cancel.
+          </span>
+        </label>
+
         {err ? <div style={{ color: '#b91c1c', fontSize: 14 }}>{err}</div> : null}
 
-        <button type="submit" disabled={submitting} style={primaryBtnStyle}>
-          {submitting ? 'Starting checkout…' : 'Continue to payment'}
+        <button type="submit" disabled={submitting || !acceptTerms} style={{ ...primaryBtnStyle, opacity: submitting || !acceptTerms ? 0.6 : 1, cursor: submitting || !acceptTerms ? 'not-allowed' : 'pointer' }}>
+          {submitting ? 'Starting checkoutâ¦' : 'Continue to Stripe ($9.99/wk)'}
         </button>
 
         <p style={{ color: '#64748b', fontSize: 12, marginTop: 8 }}>
           You'll be redirected to Stripe to complete your subscription. After payment your
-          Subcontractor mode is unlocked immediately — you can toggle availability from your
+          Subcontractor mode is unlocked immediately â you can toggle availability from your
           dashboard calendar.
         </p>
       </form>
@@ -161,6 +199,14 @@ const primaryBtnStyle: React.CSSProperties = {
   border: 'none',
   borderRadius: 10,
   cursor: 'pointer',
+};
+
+const paywallBoxStyle: React.CSSProperties = {
+  background: '#fffbeb',
+  border: '1px solid #fcd34d',
+  borderRadius: 10,
+  padding: '12px 16px',
+  marginBottom: 20,
 };
 
 export default BecomeSubcontractor;

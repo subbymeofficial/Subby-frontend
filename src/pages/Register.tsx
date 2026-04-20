@@ -123,7 +123,7 @@ export default function Register() {
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 <p className="font-semibold">Subcontractor subscription required</p>
                 <p className="mt-1">
-                  After sign-up you'll be guided to start a <strong>{STANDARD_PRICE_TXT}/week</strong> Standard subscription via Stripe. A Premium plan at <strong>{PREMIUM_PRICE_TXT}/week</strong> is also available
+                  After sign-up you'll be guided to start a <strong>$15 AUD / $10 USD per week</strong> Standard subscription via Stripe (your local currency is shown at checkout). A Premium plan at <strong>$25 AUD / $18 USD per week</strong> is also available
                   to activate your listing. You can cancel anytime from your dashboard. No refunds for partial weeks.
                 </p>
               </div>

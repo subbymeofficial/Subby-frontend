@@ -14,6 +14,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [searchParams] = useSearchParams();
   const roleParam = searchParams.get("role");
   const initialRole: UserRole = roleParam === "contractor" ? "contractor" : "client";
@@ -28,9 +29,9 @@ export default function Register() {
     const params = new URLSearchParams(window.location.search);
     const error = params.get("error");
     if (error) {
-      toast({ 
-        title: "Sign Up Failed", 
-        description: error, 
+      toast({
+        title: "Sign Up Failed",
+        description: error,
         variant: "destructive",
         duration: 6000,
       });
@@ -41,6 +42,14 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptTerms) {
+      toast({
+        title: "Please accept the Terms",
+        description: "You must agree to the Terms of Service and Privacy Policy to create an account.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsLoading(true);
     try {
       await register(name, email, password, role);
@@ -58,6 +67,14 @@ export default function Register() {
   };
 
   const handleGoogleSignUp = () => {
+    if (!acceptTerms) {
+      toast({
+        title: "Please accept the Terms",
+        description: "You must agree to the Terms of Service and Privacy Policy to create an account.",
+        variant: "destructive",
+      });
+      return;
+    }
     registerWithGoogle(role);
   };
 
@@ -94,6 +111,16 @@ export default function Register() {
             </div>
             )}
 
+            {role === "contractor" && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <p className="font-semibold">Subcontractor subscription required</p>
+                <p className="mt-1">
+                  After sign-up you'll be guided to start a <strong>$9.99&nbsp;AUD / week</strong> subscription via Stripe
+                  to activate your listing. You can cancel anytime from your dashboard. No refunds for partial weeks.
+                </p>
+              </div>
+            )}
+
             <GoogleSignInButton
               onClick={handleGoogleSignUp}
               text="Sign up with Google"
@@ -121,13 +148,13 @@ export default function Register() {
             <div className="space-y-2">
               <Label>Password</Label>
               <div className="relative">
-                <Input 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="Minimum 8 characters" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  required 
-                  minLength={8} 
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Minimum 8 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
                   disabled={isLoading}
                   className="pr-10"
                 />
@@ -141,7 +168,24 @@ export default function Register() {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+
+            <label className="flex items-start gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-input"
+                disabled={isLoading}
+              />
+              <span>
+                I agree to the{" "}
+                <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service</Link>
+                {" "}and{" "}
+                <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link>.
+              </span>
+            </label>
+
+            <Button type="submit" className="w-full" size="lg" disabled={isLoading || !acceptTerms}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
@@ -154,4 +198,3 @@ export default function Register() {
     </div>
   );
 }
-

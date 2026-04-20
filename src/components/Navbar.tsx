@@ -92,14 +92,16 @@ export function Navbar() {
             </>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </Button>
+        <div className="flex items-center gap-2 md:hidden">
+          {isAuthenticated && user && <RoleSwitcher />}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </Button>
+        </div>
       </nav>
       {mobileOpen && (
         <div className="border-t bg-[#D6E8FF] p-4 md:hidden animate-fade-in">

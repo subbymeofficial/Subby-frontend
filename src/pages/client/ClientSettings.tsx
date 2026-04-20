@@ -10,6 +10,8 @@ import { useUpdateProfile, useChangePassword, useDeleteSelfAccount } from "@/hoo
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, User as UserIcon, Lock } from "lucide-react";
 import { ProfileImageUpload } from "@/components/ProfileImageUpload";
+import { LocationSelect } from "@/components/LocationSelect";
+import { useMarket } from "@/context/MarketContext";
 
 export default function ClientSettings() {
   const { user, refreshUser } = useAuth();
@@ -17,6 +19,7 @@ export default function ClientSettings() {
   const changePassword = useChangePassword();
   const deleteSelf = useDeleteSelfAccount();
   const { toast } = useToast();
+  const { market } = useMarket();
 
   const [form, setForm] = useState({
     name: user?.name || "",
@@ -102,10 +105,12 @@ export default function ClientSettings() {
               <Label>Phone</Label>
               <Input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="e.g. 0412 345 678" />
             </div>
-            <div className="space-y-2">
-              <Label>Location</Label>
-              <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Texas, USA" />
-            </div>
+            <LocationSelect
+              value={form.location}
+              lockCountry={market?.code === "US" ? "US" : "AU"}
+              helperText="We use this to show you tradies in your area."
+              onChange={(formatted) => setForm({ ...form, location: formatted })}
+            />
             <div className="space-y-2">
               <Label>Bio</Label>
               <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} placeholder="Tell us about yourself..." />

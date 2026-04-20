@@ -1,9 +1,12 @@
-import { Link } from "react-router-dom";
-import { MapPin, Bookmark } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { MapPin, Bookmark, MessageSquare, Phone } from "lucide-react";
 import type { User } from "@/lib/types";
 import { RatingStars } from "./RatingStars";
 import { VerifiedBadge } from "./VerifiedBadge";
 import { Button } from "./ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { useCreateConversation } from "@/hooks/use-api";
+import { useToast } from "@/hooks/use-toast";
 
 interface ContractorCardProps {
   contractor: User;
@@ -13,10 +16,35 @@ interface ContractorCardProps {
 
 export function ContractorCard({ contractor, isSaved = false, onToggleSave }: ContractorCardProps) {
   const id = contractor._id || contractor.id;
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const createConversation = useCreateConversation();
+  const { toast } = useToast();
+
   const avatarUrl =
     contractor.profileImage?.url ||
     contractor.avatar ||
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${contractor.name}`;
+
+  const handleMessage = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!id) return;
+    if (!isAuthenticated) {
+      navigate(`/login?redirect=/contractors/${id}`);
+      return;
+    }
+    try {
+      const conv = await createConversation.mutateAsync({ participantId: id });
+      navigate(`/messages?c=${conv._id}`);
+    } catch (err) {
+      toast({
+        title: "Could not start chat",
+        description: String(err),
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="group rounded-lg border bg-card p-4 card-shadow transition-all hover:card-shadow-hover">
@@ -68,6 +96,17 @@ export function ContractorCard({ contractor, isSaved = false, onToggleSave }: Co
             {contractor.location || "Location not set"}
           </div>
 
+          {contractor.phone && (
+            <a
+              href={`tel:${contractor.phone}`}
+              onClick={(e) => e.stopPropagation()}
+              className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Phone size={14} />
+              {contractor.phone}
+            </a>
+          )}
+
           <div className="mt-1">
             <RatingStars
               rating={contractor.averageRating || 0}
@@ -80,13 +119,25 @@ export function ContractorCard({ contractor, isSaved = false, onToggleSave }: Co
             {contractor.bio || "No description provided."}
           </p>
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex items-center justify-between gap-2">
             <span className="text-sm font-semibold text-foreground">
               {contractor.hourlyRate ? `$${contractor.hourlyRate}/hr` : "Rate not set"}
             </span>
-            <Button asChild size="sm">
-              <Link to={`/contractors/${id}`}>View Profile</Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleMessage}
+                disabled={createConversation.isPending}
+                title="Send a message"
+              >
+                <MessageSquare size={14} className="mr-1" />
+                Message
+              </Button>
+              <Button asChild size="sm">
+                <Link to={`/contractors/${id}`}>View Profile</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

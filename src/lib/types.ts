@@ -21,7 +21,9 @@ export interface User {
   reviewCount: number;
   subscriptionPlan?: "standard" | "premium" | "client" | null;
   subscriptionStatus?: "active" | "trialing" | "past_due" | "cancelled" | null;
+  subscription?: { status?: "active" | "trialing" | "past_due" | "cancelled" } | null;
   subscriptionExpiresAt?: string | null;
+  activeView?: "client" | "contractor";
   hasQualificationUpgrade?: boolean;
   stripeCustomerId?: string;
   savedContractors?: string[];

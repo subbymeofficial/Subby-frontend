@@ -28,9 +28,17 @@ export default function Register() {
   const initialRole: UserRole = roleParam === "contractor" ? "contractor" : "client";
   const [role, setRole] = useState<UserRole>(initialRole);
   const [isLoading, setIsLoading] = useState(false);
-  const { register, registerWithGoogle } = useAuth();
+  const { register, registerWithGoogle, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // If already signed in, skip the form and go to the dashboard.
+  useEffect(() => {
+    if (user) {
+      const dashPath = user.role === "admin" ? "/admin" : `/dashboard/${user.role}`;
+      navigate(dashPath, { replace: true });
+    }
+  }, [user, navigate]);
 
   // Check for error in URL (from Google OAuth redirect)
   useEffect(() => {

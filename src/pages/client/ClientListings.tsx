@@ -12,12 +12,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { getApiError } from "@/context/AuthContext";
 import { Plus, Trash2, Loader2, CreditCard, Pencil, X } from "lucide-react";
+import { LocationSelect } from "@/components/LocationSelect";
+import { useMarket } from "@/context/MarketContext";
 
 const URGENCY_OPTIONS = ["low", "medium", "high", "urgent"];
 const STATUS_OPTIONS = ["open", "in_progress", "completed", "cancelled"];
 
 export default function ClientListings() {
   const navigate = useNavigate();
+  const { market } = useMarket();
   const { data: listings, isLoading } = useMyListings();
   const { data: subStatus } = useSubscriptionStatus();
   const createListing = useCreateListing();
@@ -140,8 +143,14 @@ export default function ClientListings() {
         </div>
       </div>
       <div className="space-y-2"><Label>Description</Label><Textarea value={values.description} onChange={(e) => setValues({ ...values, description: e.target.value })} rows={3} required /></div>
-      <div className="grid gap-4 sm:grid-cols-4">
-        <div className="space-y-2"><Label>Location</Label><Input value={values.location} onChange={(e) => setValues({ ...values, location: e.target.value })} required /></div>
+      <LocationSelect
+        value={values.location}
+        lockCountry={market?.code === "US" ? "US" : "AU"}
+        helperText="Where the work needs to happen."
+        required
+        onChange={(formatted) => setValues({ ...values, location: formatted })}
+      />
+      <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2"><Label>Budget Min ($)</Label><Input type="number" value={values.budgetMin} onChange={(e) => setValues({ ...values, budgetMin: e.target.value })} /></div>
         <div className="space-y-2"><Label>Budget Max ($)</Label><Input type="number" value={values.budgetMax} onChange={(e) => setValues({ ...values, budgetMax: e.target.value })} /></div>
         <div className="space-y-2">
@@ -170,7 +179,7 @@ export default function ClientListings() {
           <p className="text-foreground font-medium">Subscribe to post job listings.</p>
           <Button asChild size="sm">
             <Link to="/dashboard/client/subscription">
-              <CreditCard size={16} className="mr-1" /> Subscribe — $10/week
+              <CreditCard size={16} className="mr-1" /> Subscribe â $10/week
             </Link>
           </Button>
         </div>
@@ -212,7 +221,7 @@ export default function ClientListings() {
                     <Badge variant="secondary">{l.category}</Badge>
                     <Badge variant={l.urgency === "urgent" ? "destructive" : l.urgency === "high" ? "default" : "outline"} className="capitalize">{l.urgency}</Badge>
                     <span className="text-xs text-muted-foreground">{l.applicationCount} apps</span>
-                    {l.budget && <span className="text-xs text-muted-foreground">${l.budget.min}–${l.budget.max}</span>}
+                    {l.budget && <span className="text-xs text-muted-foreground">${l.budget.min}â${l.budget.max}</span>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

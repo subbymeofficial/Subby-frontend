@@ -12,13 +12,14 @@ type NavLinkDef = { label: string; path: string };
 // Marketplace link is role-aware: contractors get "Find Jobs", everyone else gets "Find Contractors".
 // Fixes the post-signup navigation gap where contractors had no discoverable path to job listings.
 const buildNavLinks = (role?: string): NavLinkDef[] => {
-  const marketplaceLink: NavLinkDef =
+  const extraLinks: NavLinkDef[] =
     role === "contractor"
-      ? { label: "Find Jobs", path: "/dashboard/contractor/jobs" }
-      : { label: "Find Contractors", path: "/contractors" };
+      ? [{ label: "Find Jobs", path: "/dashboard/contractor/jobs" }]
+      : [];
   return [
     { label: "Home", path: "/" },
-    marketplaceLink,
+    { label: "Find Contractors", path: "/contractors" },
+    ...extraLinks,
     { label: "Contact", path: "/contact" },
   ];
 };

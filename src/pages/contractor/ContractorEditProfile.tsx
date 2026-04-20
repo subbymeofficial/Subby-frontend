@@ -14,8 +14,9 @@ import { useMarket } from "@/context/MarketContext";
 import { Loader2, PartyPopper, Plus, X, Upload } from "lucide-react";
 import { ProfileImageUpload } from "@/components/ProfileImageUpload";
 import { VerificationDocumentsUpload } from "@/components/VerificationDocumentsUpload";
+import { LocationSelect } from "@/components/LocationSelect";
 
-// ─── AU Trades ────────────────────────────────────────────────────────────────
+// âââ AU Trades ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const AU_TRADES: Record<string, string[]> = {
   "Boilermaker / Welder": ["Boilermaker", "Welder - MIG", "Welder - TIG", "Welder - Stick/Arc", "Pipe Welder", "Steel Fabricator"],
   "Building": ["Piling Labourer", "Piling Rig Operator", "Crane Operator", "Tower Crane Operator", "Excavator Operator", "Builders Labourer", "Carpenter", "Roofer", "Concreter", "Stonemason", "Scaffolder", "Plasterer", "Tiler", "Bricklayer", "Demolition", "Fencer", "Glazier", "Gyprocker", "Insulation Installer", "Renderer", "Waterproofer"],
@@ -37,7 +38,7 @@ const AU_TRADES: Record<string, string[]> = {
   "Specialty & Other": ["Sign Writer", "Line Marker", "Sandblaster", "Asbestos Removalist", "Diver - Commercial", "Surveyor", "Drafts Person / CAD", "Safety Officer / Advisor", "First Aid Officer"],
 };
 
-// ─── US Trades ────────────────────────────────────────────────────────────────
+// âââ US Trades ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const US_TRADES: Record<string, string[]> = {
   "Construction": ["General Contractor", "Framer / Rough Carpenter", "Finish Carpenter / Trim", "Cabinet Maker / Millwork", "Concrete Worker / Finisher", "Masonry / Bricklayer", "Roofer", "Drywall Installer", "Insulation Installer", "Waterproofing Specialist", "Window & Door Installer", "Glazier", "Flooring Installer", "Tile Setter", "Painter / Finisher", "Demolition Worker", "Scaffolding Worker", "Ironworker", "Structural Steel Worker"],
   "Civil & Heavy": ["Laborer", "Excavator Operator", "Bulldozer Operator", "Grader Operator", "Skid Steer / Bobcat Operator", "Road Construction Worker", "Pipelayer", "Driller", "Traffic Control Flagger", "Surveyor", "Project Manager", "Site Superintendent", "Estimator"],
@@ -46,60 +47,60 @@ const US_TRADES: Record<string, string[]> = {
   "Plumbing & HVAC": ["Residential Plumber", "Commercial Plumber", "Pipefitter", "HVAC Technician", "Refrigeration Technician", "Gas Fitter", "Steam Fitter"],
   "Welding & Fabrication": ["Structural Welder", "Pipe Welder", "MIG Welder", "TIG Welder", "Stick / Arc Welder", "Steel Fabricator", "Sheet Metal Worker"],
   "Mechanical & Automotive": ["Diesel Mechanic", "Automotive Mechanic", "Heavy Equipment Mechanic", "Marine Mechanic", "HVAC / Refrigeration Mechanic", "Fire Protection Technician"],
-  "Owner Operators": ["Mini Excavator (up to 6,000 lbs)", "Excavator (6,000–20,000 lbs)", "Excavator (20,000–50,000 lbs)", "Excavator (50,000+ lbs)", "Bulldozer", "Motor Grader", "Skid Steer / Bobcat", "Water Truck", "Crane Truck", "10–14 Yard Dump Truck", "Semi / Articulated Dump Truck", "Concrete Pump", "Boom Pump", "Roller / Compactor", "Telehandler", "Boom Lift / AWP", "Scissor Lift", "Forklift"],
+  "Owner Operators": ["Mini Excavator (up to 6,000 lbs)", "Excavator (6,000â20,000 lbs)", "Excavator (20,000â50,000 lbs)", "Excavator (50,000+ lbs)", "Bulldozer", "Motor Grader", "Skid Steer / Bobcat", "Water Truck", "Crane Truck", "10â14 Yard Dump Truck", "Semi / Articulated Dump Truck", "Concrete Pump", "Boom Pump", "Roller / Compactor", "Telehandler", "Boom Lift / AWP", "Scissor Lift", "Forklift"],
   "Landscaping & Outdoor": ["Landscaper", "Lawn Care / Turf Specialist", "Arborist / Tree Surgeon", "Paving Specialist", "Retaining Wall Builder", "Irrigation Installer", "Pool Builder", "Deck Builder", "Fence Installer"],
   "Cleaning Services": ["Commercial Cleaner", "Residential Cleaner", "Window Cleaner", "Carpet Cleaner", "Pressure Washer", "Post-Construction Cleaner", "Industrial Cleaner"],
   "Home Services": ["Handyman", "Locksmith", "Pest Control Technician", "Appliance Repair Technician", "Blind & Curtain Installer", "Garage Door Technician", "Smart Home Installer", "Mobile Mechanic"],
   "IT & Technology": ["IT Support Technician", "Network Cabling Installer", "CCTV / Security Installer", "AV Installer", "Web Developer / Designer", "Graphic Designer"],
-  "Transport & Logistics": ["Courier / Delivery Driver", "Moving / Relocation Specialist", "Tow Truck Operator", "Truck Driver – Class A CDL", "Truck Driver – Class B CDL", "Hazmat Driver"],
+  "Transport & Logistics": ["Courier / Delivery Driver", "Moving / Relocation Specialist", "Tow Truck Operator", "Truck Driver â Class A CDL", "Truck Driver â Class B CDL", "Hazmat Driver"],
   "Hospitality & Events": ["Chef / Cook", "Bartender", "Server / Wait Staff", "Event Setup Crew", "Catering Staff", "DJ / Sound Technician", "Security Guard", "Barista"],
   "Personal Services": ["Barber", "Hair Stylist", "Esthetician", "Nail Technician", "Massage Therapist", "Dog Groomer", "Personal Trainer", "Photographer", "Videographer"],
   "Staffing & Temp": ["Receptionist", "Administrative Assistant", "Data Entry Clerk", "Teacher / Tutor", "Teacher's Aide", "Childcare Worker", "Home Health Aide", "CNA (Certified Nursing Assistant)", "Registered Nurse (RN)", "Licensed Practical Nurse (LPN)", "Medical Assistant", "Warehouse Worker", "Forklift Operator", "General Laborer", "Retail Associate", "Night Stock / Shelf Stocker", "Accountant", "Bookkeeper", "Paralegal", "Real Estate Agent", "Property Manager", "Mortgage Loan Officer", "Insurance Agent"],
   "Specialty & Other": ["Sign Maker / Installer", "Line Striper", "Sandblaster", "Asbestos / Hazmat Abatement Worker", "Commercial Diver", "Safety Officer / Advisor", "Quality Control Inspector", "First Aid Officer"],
 };
 
-// ─── AU Tickets ───────────────────────────────────────────────────────────────
+// âââ AU Tickets âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const AU_TICKETS: Record<string, string[]> = {
   "Safety Inductions": ["White Card (General Construction Induction)", "Working at Heights", "Confined Space Entry", "Confined Space Supervisor", "Confined Space Rescue"],
-  "Crane Licences (HRWL)": ["C1 Open – Slewing Mobile Crane (Unrestricted)", "Slewing Mobile Crane (up to 20t)", "Slewing Mobile Crane (20–100t)", "Slewing Mobile Crane (100t+)", "C6 – Non-Slewing Mobile Crane (up to 3t)", "C2 – Non-Slewing Mobile Crane (over 3t)", "Self-Erecting Tower Crane", "Tower Crane", "Vehicle Loading Crane", "Bridge and Gantry Crane", "Franna / Pick and Carry Crane", "Portal Boom Crane", "Derrick Crane"],
+  "Crane Licences (HRWL)": ["C1 Open â Slewing Mobile Crane (Unrestricted)", "Slewing Mobile Crane (up to 20t)", "Slewing Mobile Crane (20â100t)", "Slewing Mobile Crane (100t+)", "C6 â Non-Slewing Mobile Crane (up to 3t)", "C2 â Non-Slewing Mobile Crane (over 3t)", "Self-Erecting Tower Crane", "Tower Crane", "Vehicle Loading Crane", "Bridge and Gantry Crane", "Franna / Pick and Carry Crane", "Portal Boom Crane", "Derrick Crane"],
   "Rigging & Dogging (HRWL)": ["Dogging (DG)", "Rigging Basic (RB)", "Rigging Intermediate (RI)", "Rigging Advanced (RA)"],
   "Scaffolding (HRWL)": ["Scaffolding Basic (SB)", "Scaffolding Intermediate (SI)", "Scaffolding Advanced (SA)"],
-  "EWP & Forklift (HRWL)": ["Forklift Licence (LF)", "EWP – Boom Type (WP)", "EWP – Scissor Lift / Vertical", "Telehandler Licence"],
+  "EWP & Forklift (HRWL)": ["Forklift Licence (LF)", "EWP â Boom Type (WP)", "EWP â Scissor Lift / Vertical", "Telehandler Licence"],
   "First Aid & Emergency": ["First Aid (HLTAID011)", "CPR Only (HLTAID009)", "Advanced First Aid (HLTAID012)", "Mental Health First Aid", "Emergency Warden", "Fire Extinguisher Training"],
-  "Asbestos": ["Asbestos Awareness", "Class B – Non-Friable Asbestos Removal", "Class A – Friable Asbestos Removal", "Asbestos Assessor"],
+  "Asbestos": ["Asbestos Awareness", "Class B â Non-Friable Asbestos Removal", "Class A â Friable Asbestos Removal", "Asbestos Assessor"],
   "Traffic Management": ["Traffic Controller (TC)", "Implement Traffic Control Plans", "Prepare Traffic Management Plans"],
   "Vehicle Licences": ["MR Licence", "HR Licence", "HC Licence", "MC Licence", "Dangerous Goods (DG)", "Tow Truck Operator Licence"],
   "Gas & Plumbing": ["Plumbing Licence", "Gas Fitting Licence", "Drainer's Licence", "Mechanical Services (HVAC) Licence"],
   "Electrical": ["Electrical Contractor Licence", "Electrical Worker Licence (A Grade)", "Restricted Electrical Licence", "Solar PV Accreditation (CEC)", "Switchboard Licence"],
-  "Demolition (HRWL)": ["Demolition – Non-Structural", "Demolition – Structural"],
-  "Explosive & Pyrotechnics (HRWL)": ["Explosive-Powered Tools (EP)", "Blasting – Surface", "Blasting – Underground", "Pyrotechnics Licence"],
-  "Pressure Equipment (HRWL)": ["Boiler Operation – Standard", "Boiler Operation – Advanced", "Steam Turbine Operation", "Reciprocating Engine Operation"],
-  "Security & Compliance": ["Security Licence – Class 1", "Security Licence – Class 2", "RSA (Responsible Service of Alcohol)", "RSG (Responsible Service of Gambling)", "Working with Children Check", "NDIS Worker Screening", "National Police Check"],
+  "Demolition (HRWL)": ["Demolition â Non-Structural", "Demolition â Structural"],
+  "Explosive & Pyrotechnics (HRWL)": ["Explosive-Powered Tools (EP)", "Blasting â Surface", "Blasting â Underground", "Pyrotechnics Licence"],
+  "Pressure Equipment (HRWL)": ["Boiler Operation â Standard", "Boiler Operation â Advanced", "Steam Turbine Operation", "Reciprocating Engine Operation"],
+  "Security & Compliance": ["Security Licence â Class 1", "Security Licence â Class 2", "RSA (Responsible Service of Alcohol)", "RSG (Responsible Service of Gambling)", "Working with Children Check", "NDIS Worker Screening", "National Police Check"],
   "Mining & Resources": ["Surface Extraction Supervisor", "Underground Mining Certification", "Coal Mining (SIMTARS)", "Radiation Safety Licence"],
-  "General Competencies": ["Manual Handling", "Chemical Handling / Hazmat", "Noise Awareness", "Food Safety Supervisor", "VOC – Site Specific Competency", "Lead Awareness"],
+  "General Competencies": ["Manual Handling", "Chemical Handling / Hazmat", "Noise Awareness", "Food Safety Supervisor", "VOC â Site Specific Competency", "Lead Awareness"],
 };
 
-// ─── US Tickets ───────────────────────────────────────────────────────────────
+// âââ US Tickets âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const US_TICKETS: Record<string, string[]> = {
-  "OSHA Safety": ["OSHA 10-Hour – Construction", "OSHA 30-Hour – Construction", "OSHA 10-Hour – General Industry", "OSHA 30-Hour – General Industry", "OSHA 510 – Construction Standards", "OSHA 500 – Trainer of OSHA Outreach Trainers"],
+  "OSHA Safety": ["OSHA 10-Hour â Construction", "OSHA 30-Hour â Construction", "OSHA 10-Hour â General Industry", "OSHA 30-Hour â General Industry", "OSHA 510 â Construction Standards", "OSHA 500 â Trainer of OSHA Outreach Trainers"],
   "First Aid & Emergency": ["CPR / AED Certified", "First Aid / CPR / AED (Red Cross)", "First Aid / CPR / AED (AHA)", "Emergency Medical Technician (EMT)", "Mental Health First Aid", "Wilderness First Aid"],
-  "Crane Certification (NCCCO)": ["Telescopic Boom Crane – Fixed Cab", "Telescopic Boom Crane – Swing Cab", "Lattice Boom Crawler Crane", "Lattice Boom Truck Crane", "Tower Crane", "Articulating Crane", "Overhead / Bridge Crane", "Rigger Level I", "Rigger Level II", "Signal Person Qualification"],
+  "Crane Certification (NCCCO)": ["Telescopic Boom Crane â Fixed Cab", "Telescopic Boom Crane â Swing Cab", "Lattice Boom Crawler Crane", "Lattice Boom Truck Crane", "Tower Crane", "Articulating Crane", "Overhead / Bridge Crane", "Rigger Level I", "Rigger Level II", "Signal Person Qualification"],
   "Forklift & Aerial": ["Forklift Operator Certification", "Boom Lift / AWP Certification", "Scissor Lift Certification", "Telehandler Certification"],
   "Confined Space & Hazmat": ["Confined Space Entry", "Confined Space Rescue", "HAZWOPER 8-Hour (Refresher)", "HAZWOPER 24-Hour", "HAZWOPER 40-Hour", "Hazardous Materials Awareness", "Lead Abatement Worker", "Asbestos Abatement Worker"],
   "Fall Protection & Scaffolding": ["Fall Protection Competent Person", "Fall Arrest & Restraint Systems", "Scaffolding Competent Person", "Scaffolding Erector / Dismantler"],
   "Rigging & Signaling": ["Rigging & Signaling Certification", "Crane Signal Person"],
-  "Electrical": ["Journeyman Electrician License", "Master Electrician License", "Electrical Apprentice License", "NFPA 70E – Electrical Safety", "Solar PV Installer (NABCEP)", "Low Voltage Technician License"],
-  "Plumbing & HVAC": ["Journeyman Plumber License", "Master Plumber License", "Plumbing Apprentice License", "EPA 608 – Universal (All Types)", "EPA 608 – Type I (Small Appliances)", "EPA 608 – Type II (High-Pressure)", "EPA 608 – Type III (Low-Pressure)", "Gas Fitter License", "HVAC Excellence Certification"],
-  "Welding (AWS)": ["AWS D1.1 – Structural Steel", "AWS D1.2 – Structural Aluminum", "AWS D1.6 – Stainless Steel", "AWS Certified Welding Inspector (CWI)", "Pipe Welding Certification"],
-  "Commercial Driver (CDL)": ["CDL – Class A", "CDL – Class B", "CDL – Class C", "CDL – Hazmat Endorsement", "CDL – Tanker Endorsement", "CDL – Doubles / Triples Endorsement", "CDL – Passenger Endorsement"],
+  "Electrical": ["Journeyman Electrician License", "Master Electrician License", "Electrical Apprentice License", "NFPA 70E â Electrical Safety", "Solar PV Installer (NABCEP)", "Low Voltage Technician License"],
+  "Plumbing & HVAC": ["Journeyman Plumber License", "Master Plumber License", "Plumbing Apprentice License", "EPA 608 â Universal (All Types)", "EPA 608 â Type I (Small Appliances)", "EPA 608 â Type II (High-Pressure)", "EPA 608 â Type III (Low-Pressure)", "Gas Fitter License", "HVAC Excellence Certification"],
+  "Welding (AWS)": ["AWS D1.1 â Structural Steel", "AWS D1.2 â Structural Aluminum", "AWS D1.6 â Stainless Steel", "AWS Certified Welding Inspector (CWI)", "Pipe Welding Certification"],
+  "Commercial Driver (CDL)": ["CDL â Class A", "CDL â Class B", "CDL â Class C", "CDL â Hazmat Endorsement", "CDL â Tanker Endorsement", "CDL â Doubles / Triples Endorsement", "CDL â Passenger Endorsement"],
   "Trade Licenses": ["General Contractor License", "Residential Contractor License", "Commercial Contractor License", "Roofing Contractor License", "Home Improvement License", "Pesticide Applicator License", "Security Guard License"],
   "Excavation & Trenching": ["Excavation Competent Person", "Trenching Safety", "Underground Utilities Locator (811 Certified)"],
-  "Mining & Energy": ["MSHA Part 46 – Surface Mining", "MSHA Part 48 – Underground Mining", "Radiation Safety Officer", "Blasting / Explosives License"],
+  "Mining & Energy": ["MSHA Part 46 â Surface Mining", "MSHA Part 48 â Underground Mining", "Radiation Safety Officer", "Blasting / Explosives License"],
   "Background & Compliance": ["Background Check Cleared", "Drug Test Cleared", "Working with Children Clearance", "TSA PreCheck / Security Clearance"],
-  "General Competencies": ["Competent Person – General Safety", "Bloodborne Pathogens", "Personal Protective Equipment (PPE)", "Manual Handling / Ergonomics", "Toolbox Talks Facilitator"],
+  "General Competencies": ["Competent Person â General Safety", "Bloodborne Pathogens", "Personal Protective Equipment (PPE)", "Manual Handling / Ergonomics", "Toolbox Talks Facilitator"],
 };
 
-// ─── Insurance options ────────────────────────────────────────────────────────
+// âââ Insurance options ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const AU_INSURANCE = ["Public Liability", "Workers Comp", "Tools Insurance", "Vehicle Insurance"];
 const US_INSURANCE = ["General Liability", "Workers' Compensation", "Commercial Auto", "Tools & Equipment", "Builder's Risk"];
 
@@ -233,7 +234,6 @@ export default function ContractorEditProfile() {
   const abnPlaceholder = isUS ? "XX-XXXXXXX" : "XX XXX XXX XXX";
   const abnHint = isUS ? "9 digits" : "11 digits";
   const locationLabel = isUS ? "City & State" : "Location";
-  const locationPlaceholder = isUS ? "e.g. Austin, TX" : "e.g. Sydney, NSW";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -397,10 +397,13 @@ export default function ContractorEditProfile() {
             </div>
 
             {/* Location */}
-            <div className="space-y-2">
-              <Label>{locationLabel}</Label>
-              <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder={locationPlaceholder} />
-            </div>
+            <LocationSelect
+              label={locationLabel}
+              value={form.location}
+              lockCountry={isUS ? "US" : "AU"}
+              helperText="Clients use this to find tradies near them."
+              onChange={(formatted) => setForm({ ...form, location: formatted })}
+            />
 
             {/* Rate + Phone */}
             <div className="grid gap-4 sm:grid-cols-2">
@@ -494,7 +497,7 @@ export default function ContractorEditProfile() {
                 ) : (
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Certification name</label>
-                    <Input value={ticketOther} onChange={(e) => setTicketOther(e.target.value)} placeholder={isUS ? "e.g. NCCER Core Curriculum" : "e.g. Rigging Advanced – Special Class"} />
+                    <Input value={ticketOther} onChange={(e) => setTicketOther(e.target.value)} placeholder={isUS ? "e.g. NCCER Core Curriculum" : "e.g. Rigging Advanced â Special Class"} />
                   </div>
                 )}
 

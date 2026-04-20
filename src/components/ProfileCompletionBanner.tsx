@@ -147,12 +147,12 @@ export default function ProfileCompletionBanner() {
     percent < 30
       ? "Finish your profile to start getting hired"
       : percent < 70
-      ? "You're getting there â finish your profile to unlock job leads"
+      ? "You're getting there - finish your profile to unlock job leads"
       : "Almost done! Complete your profile to stand out";
 
   const subcopy =
     percent < 30
-      ? "Contractors with a complete profile get hired 3Ã more often. It takes about 4 minutes."
+      ? "Contractors with a complete profile get hired 3x more often. It takes about 4 minutes."
       : percent < 70
       ? "A few quick details left and your profile will appear in search results."
       : "One or two final touches and you're all set.";

@@ -12,9 +12,9 @@ interface ProtectedRouteProps {
  * Subscription-aware route guard.
  *
  * Rules:
- *  - Not logged in        → /login
- *  - Role not allowed     → /
- *  - Contractor without an active/trialing subscription → /dashboard/contractor/subscription
+ *  - Not logged in        â /login
+ *  - Role not allowed     â /
+ *  - Contractor without an active/trialing subscription â /dashboard/contractor/subscription
  *    (the subscription page, the contractor overview and /messages/settings stay reachable
  *    so the subbie can actually pay and still receive messages.)
  *
@@ -34,8 +34,19 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role))
-    return <Navigate to="/" replace />;
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    // Exception: a contractor with an active/trialing subscription may
+    // access client (builder) routes via the RoleSwitcher toggle.
+    const subStatus = user.subscriptionStatus ?? user.subscription?.status;
+    const isPaidContractor =
+      user.role === "contractor" &&
+      (subStatus === "active" || subStatus === "trialing");
+    const isClientRoute = allowedRoles.includes("client");
+
+    if (!(isPaidContractor && isClientRoute)) {
+      return <Navigate to="/" replace />;
+    }
+  }
 
   // Contractor subscription gate
   if (user && user.role === "contractor") {

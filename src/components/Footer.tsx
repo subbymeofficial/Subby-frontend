@@ -29,16 +29,17 @@ export function Footer() {
             </div>
           </div>
           <div>
-            <h4 className="mb-3 font-semibold text-foreground">Contact</h4>
+            <h4 className="mb-3 font-semibold text-foreground">Legal &amp; Contact</h4>
             <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+              <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+              <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
               <span>hello@subbyme.com</span>
               <span>1300 SUB BYM</span>
-              <span>USA</span>
             </div>
           </div>
         </div>
         <div className="mt-10 border-t pt-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} SubbyMe. All rights reserved.
+          Â© {new Date().getFullYear()} SubbyMe. All rights reserved.
         </div>
       </div>
     </footer>

@@ -86,7 +86,7 @@ export function BecomeSubcontractor() {
 
       <div style={paywallBoxStyle}>
         <p style={{ fontWeight: 700, margin: 0, color: '#92400e' }}>
-          Subcontractor subscription â {STANDARD_PRICE_TXT}/week (Standard) or {PREMIUM_PRICE_TXT}/week (Premium)
+          Subcontractor subscription â $15 AUD / $10 USD per week (Standard) or $25 AUD / $18 USD per week (Premium)
         </p>
         <ul style={{ margin: '8px 0 0 20px', padding: 0, color: '#78350f', fontSize: 14, lineHeight: 1.5 }}>
           <li>Billed weekly via Stripe, auto-renews until you cancel.</li>
@@ -160,14 +160,14 @@ export function BecomeSubcontractor() {
             <Link to="/terms" target="_blank" style={{ color: '#0ea5e9' }}>Subscription Terms</Link>
             {' and '}
             <Link to="/privacy" target="_blank" style={{ color: '#0ea5e9' }}>Privacy Policy</Link>, and I understand my card will be
-            charged {STANDARD_PRICE_TXT} weekly (Standard) or {PREMIUM_PRICE_TXT} weekly (Premium, if selected) until I cancel.
+            charged $15 AUD / $10 USD weekly (Standard) or $25 AUD / $18 USD weekly (Premium, if selected) until I cancel. The exact local-currency amount is shown at Stripe checkout.
           </span>
         </label>
 
         {err ? <div style={{ color: '#b91c1c', fontSize: 14 }}>{err}</div> : null}
 
         <button type="submit" disabled={submitting || !acceptTerms} style={{ ...primaryBtnStyle, opacity: submitting || !acceptTerms ? 0.6 : 1, cursor: submitting || !acceptTerms ? 'not-allowed' : 'pointer' }}>
-          {submitting ? 'Starting checkoutâ¦' : `Continue to Stripe (${STANDARD_PRICE_TXT}/wk)`}
+          {submitting ? 'Starting checkoutâ¦' : 'Continue to Stripe'}
         </button>
 
         <p style={{ color: '#64748b', fontSize: 12, marginTop: 8 }}>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { MapPin, MessageSquare, Clock, ArrowLeft, Calendar, Loader2, LogIn, Heart, ShieldCheck, BadgeCheck } from "lucide-react";
+import { MapPin, MessageSquare, Clock, ArrowLeft, Calendar, Loader2, LogIn, Heart, ShieldCheck, BadgeCheck, Phone } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { RatingStars } from "@/components/RatingStars";
@@ -114,6 +114,14 @@ export default function ContractorProfile() {
 
               <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1"><MapPin size={14} /> {contractor.location || "Location not set"}</span>
+                {contractor.phone && (
+                  <a
+                    href={`tel:${contractor.phone}`}
+                    className="flex items-center gap-1 text-primary hover:underline"
+                  >
+                    <Phone size={14} /> {contractor.phone}
+                  </a>
+                )}
                 {contractor.hourlyRate && (
                   <span className="flex items-center gap-1">
                     <Clock size={14} /> {currencyPrefix}{contractor.hourlyRate}/hr

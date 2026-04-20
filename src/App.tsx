@@ -19,6 +19,8 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
 import BecomeSubcontractor from "./pages/BecomeSubcontractor";
 import Contact from "./pages/Contact";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ClientOverview from "./pages/client/ClientOverview";
 import ClientSubscription from "./pages/client/ClientSubscription";
 import ClientListings from "./pages/client/ClientListings";
@@ -83,6 +85,8 @@ const App = () => (
                 <Route path="/payment/success" element={<PaymentSuccess />} />
               <Route path="/become-subcontractor" element={<ProtectedRoute><BecomeSubcontractor /></ProtectedRoute>} />
                 <Route path="/payment/cancel" element={<PaymentCancel />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/messages" element={<ProtectedRoute allowedRoles={["client", "contractor"]}><Messages /></ProtectedRoute>} />
 

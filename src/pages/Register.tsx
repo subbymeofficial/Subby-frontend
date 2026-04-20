@@ -9,6 +9,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
+// Regional pricing (timezone-based region detection; AU vs rest-of-world)
+const __IS_AU = typeof window !== 'undefined' && /Australia/i.test(
+  (typeof Intl !== 'undefined' ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '')
+);
+const STANDARD_PRICE_TXT = __IS_AU ? '$15 AUD' : '$10 USD';
+const PREMIUM_PRICE_TXT  = __IS_AU ? '$25 AUD' : '$18 USD';
+
+
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -115,7 +123,7 @@ export default function Register() {
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 <p className="font-semibold">Subcontractor subscription required</p>
                 <p className="mt-1">
-                  After sign-up you'll be guided to start a <strong>$9.99&nbsp;AUD / week</strong> subscription via Stripe
+                  After sign-up you'll be guided to start a <strong>{STANDARD_PRICE_TXT}/week</strong> Standard subscription via Stripe. A Premium plan at <strong>{PREMIUM_PRICE_TXT}/week</strong> is also available
                   to activate your listing. You can cancel anytime from your dashboard. No refunds for partial weeks.
                 </p>
               </div>

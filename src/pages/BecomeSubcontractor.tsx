@@ -3,6 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { usersService } from '../services/users.service';
 
+// Regional pricing (timezone-based region detection; AU vs rest-of-world)
+const __IS_AU = typeof window !== 'undefined' && /Australia/i.test(
+  (typeof Intl !== 'undefined' ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '')
+);
+const STANDARD_PRICE_TXT = __IS_AU ? '$15 AUD' : '$10 USD';
+const PREMIUM_PRICE_TXT  = __IS_AU ? '$25 AUD' : '$18 USD';
+
+
 /**
  * Upgrade flow: a Builder (client) converts their existing account into a
  * dual-role account by adding the Subcontractor (contractor) role.
@@ -78,7 +86,7 @@ export function BecomeSubcontractor() {
 
       <div style={paywallBoxStyle}>
         <p style={{ fontWeight: 700, margin: 0, color: '#92400e' }}>
-          Subcontractor subscription â $9.99 AUD / week
+          Subcontractor subscription â {STANDARD_PRICE_TXT}/week (Standard) or {PREMIUM_PRICE_TXT}/week (Premium)
         </p>
         <ul style={{ margin: '8px 0 0 20px', padding: 0, color: '#78350f', fontSize: 14, lineHeight: 1.5 }}>
           <li>Billed weekly via Stripe, auto-renews until you cancel.</li>
@@ -152,14 +160,14 @@ export function BecomeSubcontractor() {
             <Link to="/terms" target="_blank" style={{ color: '#0ea5e9' }}>Subscription Terms</Link>
             {' and '}
             <Link to="/privacy" target="_blank" style={{ color: '#0ea5e9' }}>Privacy Policy</Link>, and I understand my card will be
-            charged $9.99 AUD weekly until I cancel.
+            charged {STANDARD_PRICE_TXT} weekly (Standard) or {PREMIUM_PRICE_TXT} weekly (Premium, if selected) until I cancel.
           </span>
         </label>
 
         {err ? <div style={{ color: '#b91c1c', fontSize: 14 }}>{err}</div> : null}
 
         <button type="submit" disabled={submitting || !acceptTerms} style={{ ...primaryBtnStyle, opacity: submitting || !acceptTerms ? 0.6 : 1, cursor: submitting || !acceptTerms ? 'not-allowed' : 'pointer' }}>
-          {submitting ? 'Starting checkoutâ¦' : 'Continue to Stripe ($9.99/wk)'}
+          {submitting ? 'Starting checkoutâ¦' : `Continue to Stripe (${STANDARD_PRICE_TXT}/wk)`}
         </button>
 
         <p style={{ color: '#64748b', fontSize: 12, marginTop: 8 }}>

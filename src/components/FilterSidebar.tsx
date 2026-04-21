@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Button } from "./ui/button";
 import { SlidersHorizontal, X, ChevronRight } from "lucide-react";
 import { AvailabilityFilter } from "./AvailabilityFilter";
+import { LocationSelect } from "./LocationSelect";
 import { TRADE_CATEGORIES } from "@/data/trades";
 
 export interface Filters {
@@ -61,14 +62,12 @@ export function FilterSidebar({ filters, onChange, mobileOpen, onClose }: Filter
       </div>
 
       {/* Location */}
-      <div className="space-y-1.5">
-        <Label>Location</Label>
-        <Input
-          placeholder="e.g. Sydney NSW or Texas, USA"
-          value={filters.location}
-          onChange={(e) => update("location", e.target.value)}
-        />
-      </div>
+      <LocationSelect
+        label="Location"
+        value={filters.location}
+        onChange={(formatted) => update("location", formatted)}
+        stacked
+      />
 
       {/* Trade Category */}
       <div className="space-y-1.5">

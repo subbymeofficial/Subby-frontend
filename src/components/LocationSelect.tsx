@@ -131,6 +131,9 @@ interface LocationSelectProps {
   /** Shown under the fields. */
   helperText?: string;
   required?: boolean;
+  /** If true, always render the sub-fields stacked vertically (one per row).
+   * Useful inside narrow containers like the filter sidebar. */
+  stacked?: boolean;
 }
 
 export function LocationSelect({
@@ -140,6 +143,7 @@ export function LocationSelect({
   lockCountry,
   helperText,
   required,
+  stacked,
 }: LocationSelectProps) {
   const initial = useMemo(
     () => parseLocation(value ?? "", lockCountry),
@@ -225,7 +229,11 @@ export function LocationSelect({
       <div
         className={cn(
           "grid gap-2",
-          lockCountry ? "sm:grid-cols-2" : "sm:grid-cols-3",
+          stacked
+            ? "grid-cols-1"
+            : lockCountry
+              ? "sm:grid-cols-2"
+              : "sm:grid-cols-3",
         )}
       >
         {!lockCountry && (

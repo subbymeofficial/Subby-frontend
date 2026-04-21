@@ -134,6 +134,8 @@ interface LocationSelectProps {
   /** If true, always render the sub-fields stacked vertically (one per row).
    * Useful inside narrow containers like the filter sidebar. */
   stacked?: boolean;
+  /** Restrict the country list to these ISO codes (e.g. ["AU", "US"]). */
+  allowedCountries?: string[];
 }
 
 export function LocationSelect({
@@ -144,6 +146,7 @@ export function LocationSelect({
   helperText,
   required,
   stacked,
+  allowedCountries,
 }: LocationSelectProps) {
   const initial = useMemo(
     () => parseLocation(value ?? "", lockCountry),
@@ -156,7 +159,14 @@ export function LocationSelect({
   const [stateCode, setStateCode] = useState(initial.stateCode);
   const [city, setCity] = useState(initial.city);
 
-  const countries = useMemo(() => Country.getAllCountries(), []);
+  const countries = useMemo(() => {
+    const all = Country.getAllCountries();
+    if (allowedCountries && allowedCountries.length > 0) {
+      const allow = new Set(allowedCountries.map((c) => c.toUpperCase()));
+      return all.filter((c) => allow.has(c.isoCode));
+    }
+    return all;
+  }, [allowedCountries]);
   const states = useMemo(
     () => (countryCode ? State.getStatesOfCountry(countryCode) : []),
     [countryCode],

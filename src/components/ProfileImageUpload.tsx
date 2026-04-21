@@ -4,6 +4,7 @@ import { useUploadProfileImage, useDeleteProfileImage } from "@/hooks/use-api";
 import { useAuth, getApiError } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Loader2, Trash2, Upload } from "lucide-react";
+import { isNative, pickImage } from "@/lib/native";
 
 const MAX_SIZE = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -15,16 +16,14 @@ export function ProfileImageUpload() {
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [nativeBusy, setNativeBusy] = useState(false);
 
   const currentImage =
     user?.profileImage?.url ||
     user?.avatar ||
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`;
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const validateAndUpload = async (file: File, previewDataUrl?: string) => {
     if (!ALLOWED_TYPES.includes(file.type)) {
       toast({
         title: "Invalid file type",
@@ -43,7 +42,7 @@ export function ProfileImageUpload() {
       return;
     }
 
-    const objectUrl = URL.createObjectURL(file);
+    const objectUrl = previewDataUrl ?? URL.createObjectURL(file);
     setPreview(objectUrl);
 
     try {
@@ -54,8 +53,37 @@ export function ProfileImageUpload() {
       toast({ title: "Upload failed", description: getApiError(error), variant: "destructive" });
     } finally {
       setPreview(null);
-      URL.revokeObjectURL(objectUrl);
+      if (!previewDataUrl) URL.revokeObjectURL(objectUrl);
       if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await validateAndUpload(file);
+  };
+
+  const handlePickNative = async () => {
+    setNativeBusy(true);
+    try {
+      const picked = await pickImage("prompt");
+      if (!picked) return;
+      const file =
+        ALLOWED_TYPES.includes(picked.file.type)
+          ? picked.file
+          : new File([picked.file], picked.file.name, { type: "image/jpeg" });
+      await validateAndUpload(file, picked.dataUrl);
+    } finally {
+      setNativeBusy(false);
+    }
+  };
+
+  const openPicker = () => {
+    if (isNative()) {
+      void handlePickNative();
+    } else {
+      fileRef.current?.click();
     }
   };
 
@@ -69,7 +97,7 @@ export function ProfileImageUpload() {
     }
   };
 
-  const isUploading = upload.isPending;
+  const isUploading = upload.isPending || nativeBusy;
   const isRemoving = remove.isPending;
   const hasImage = !!user?.profileImage?.url;
   const displayImage = preview || currentImage;
@@ -92,7 +120,7 @@ export function ProfileImageUpload() {
         </div>
         <button
           type="button"
-          onClick={() => fileRef.current?.click()}
+          onClick={openPicker}
           disabled={isUploading}
           className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
@@ -110,7 +138,7 @@ export function ProfileImageUpload() {
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => fileRef.current?.click()}
+            onClick={openPicker}
             disabled={isUploading}
           >
             {isUploading ? (

@@ -146,10 +146,20 @@ export default function ContractorEditProfile() {
   const TICKET_CATEGORY_KEYS = Object.keys(TICKETS_BY_CATEGORY);
   const INSURANCE_OPTIONS = isUS ? US_INSURANCE : AU_INSURANCE;
 
+  const _initialTrades: string[] = (user as any)?.trades || (user?.trade ? [user.trade] : []);
+  const _initialRatesRaw = ((user as any)?.tradeRates || {}) as Record<string, number>;
+  const _initialTradeRates: Record<string, number> = {};
+  for (const _t of _initialTrades) {
+    const _r = _initialRatesRaw[_t];
+    if (typeof _r === "number") _initialTradeRates[_t] = _r;
+    else if (user?.hourlyRate) _initialTradeRates[_t] = Number(user.hourlyRate);
+  }
+
   const [form, setForm] = useState({
     name: user?.name || "",
     abn: (user as any)?.abn || "",
-    trades: (user as any)?.trades || (user?.trade ? [user.trade] : []) as string[],
+    trades: _initialTrades,
+    tradeRates: _initialTradeRates,
     location: user?.location || "",
     hourlyRate: user?.hourlyRate?.toString() || "",
     bio: user?.bio || "",
@@ -180,6 +190,7 @@ export default function ContractorEditProfile() {
 
   const [pickerCategory, setPickerCategory] = useState("");
   const [pickerSpecialisation, setPickerSpecialisation] = useState("");
+  const [pickerRate, setPickerRate] = useState("");
 
   const toggleInArray = (key: "insurance" | "availableDays", value: string) => {
     setForm((f) => {
@@ -190,18 +201,31 @@ export default function ContractorEditProfile() {
 
   const addTrade = () => {
     if (!pickerCategory || !pickerSpecialisation) return;
+    const rateNum = Number(pickerRate);
+    if (!pickerRate || !Number.isFinite(rateNum) || rateNum <= 0) {
+      toast({ title: "Enter an hourly rate", description: "Set the hourly rate for this trade before adding.", variant: "destructive" });
+      return;
+    }
     const tradeValue = `${pickerCategory} > ${pickerSpecialisation}`;
     if (form.trades.includes(tradeValue)) {
       toast({ title: "Already added", description: "That trade is already in your list.", variant: "destructive" });
       return;
     }
-    setForm((f) => ({ ...f, trades: [...f.trades, tradeValue] }));
+    setForm((f) => ({
+      ...f,
+      trades: [...f.trades, tradeValue],
+      tradeRates: { ...f.tradeRates, [tradeValue]: rateNum },
+    }));
     setPickerCategory("");
     setPickerSpecialisation("");
+    setPickerRate("");
   };
 
   const removeTrade = (trade: string) => {
-    setForm((f) => ({ ...f, trades: f.trades.filter((t) => t !== trade) }));
+    setForm((f) => {
+      const { [trade]: _removed, ...rest } = f.tradeRates;
+      return { ...f, trades: f.trades.filter((t) => t !== trade), tradeRates: rest };
+    });
   };
 
   const addTicket = () => {
@@ -249,15 +273,18 @@ export default function ContractorEditProfile() {
     }
     try {
       const primaryTrade = form.trades[0]?.split(" > ").pop() || form.trades[0] || "";
+      const _rateVals = Object.values(form.tradeRates).filter((r) => typeof r === "number" && r > 0) as number[];
+      const _derivedHourlyRate = _rateVals.length > 0 ? Math.min(..._rateVals) : (form.hourlyRate ? Number(form.hourlyRate) : undefined);
       await updateProfile.mutateAsync({
         id: userId,
         data: {
           name: form.name,
           trade: primaryTrade,
           trades: form.trades,
+          tradeRates: form.tradeRates,
           abn: form.abn.replace(/\D/g, ""),
           location: form.location,
-          hourlyRate: form.hourlyRate ? Number(form.hourlyRate) : undefined,
+          hourlyRate: _derivedHourlyRate,
           bio: form.bio,
           skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
           phone: form.phone,
@@ -352,18 +379,26 @@ export default function ContractorEditProfile() {
               <Label>Trades <span className="text-xs text-muted-foreground">(add one or more)</span></Label>
               {form.trades.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {form.trades.map((trade) => (
-                    <span key={trade} className="inline-flex items-center gap-1.5 rounded-full bg-[#2E3192] text-white text-sm px-3 py-1.5 font-medium">
-                      {trade}
-                      <button type="button" onClick={() => removeTrade(trade)} className="rounded-full hover:bg-white/20 p-0.5 transition" aria-label={`Remove ${trade}`}>
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))}
+                  {form.trades.map((trade) => {
+                    const rate = form.tradeRates[trade];
+                    return (
+                      <span key={trade} className="inline-flex items-center gap-1.5 rounded-full bg-[#2E3192] text-white text-sm px-3 py-1.5 font-medium">
+                        <span>{trade}</span>
+                        {typeof rate === "number" && (
+                          <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold">
+                            {market.currencySymbol}{rate}/hr
+                          </span>
+                        )}
+                        <button type="button" onClick={() => removeTrade(trade)} className="rounded-full hover:bg-white/20 p-0.5 transition" aria-label={`Remove ${trade}`}>
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
                 </div>
               )}
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3">
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Category</label>
                     <select
@@ -387,11 +422,25 @@ export default function ContractorEditProfile() {
                       {pickerCategory && TRADES_BY_CATEGORY[pickerCategory]?.map((spec) => <option key={spec} value={spec}>{spec}</option>)}
                     </select>
                   </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hourly Rate ({market.currencySymbol}{market.currency})</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1"
+                      placeholder="e.g. 85"
+                      value={pickerRate}
+                      onChange={(e) => setPickerRate(e.target.value)}
+                      disabled={!pickerSpecialisation}
+                      className="bg-white"
+                    />
+                  </div>
                 </div>
-                <Button type="button" size="sm" onClick={addTrade} disabled={!pickerCategory || !pickerSpecialisation} className="bg-[#2E3192] hover:bg-[#1E2270] disabled:opacity-40">
+                <Button type="button" size="sm" onClick={addTrade} disabled={!pickerCategory || !pickerSpecialisation || !pickerRate} className="bg-[#2E3192] hover:bg-[#1E2270] disabled:opacity-40">
                   <Plus className="h-4 w-4 mr-1" />
                   {form.trades.length === 0 ? "Add trade" : "Add another trade"}
                 </Button>
+                <p className="text-xs text-slate-500">Set a separate hourly rate for each trade — different work, different pricing.</p>
               </div>
               {form.trades.length === 0 && <p className="text-xs text-destructive">Add at least one trade to continue.</p>}
             </div>
@@ -405,16 +454,10 @@ export default function ContractorEditProfile() {
               onChange={(formatted) => setForm({ ...form, location: formatted })}
             />
 
-            {/* Rate + Phone */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Hourly Rate ({market.currencySymbol}{market.currency})</Label>
-                <Input type="number" value={form.hourlyRate} onChange={(e) => setForm({ ...form, hourlyRate: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Phone</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              </div>
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label>Phone</Label>
+              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             </div>
 
             {/* Bio */}

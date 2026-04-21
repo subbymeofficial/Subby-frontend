@@ -67,6 +67,7 @@ export function FilterSidebar({ filters, onChange, mobileOpen, onClose }: Filter
         value={filters.location}
         onChange={(formatted) => update("location", formatted)}
         stacked
+        allowedCountries={["AU", "US"]}
       />
 
       {/* Trade Category */}

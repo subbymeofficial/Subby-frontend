@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { authService } from "@/services/auth.service";
 import { usersService } from "@/services/users.service";
+import { pushService } from "@/services/push.service";
+import { isNative, registerPush, clearPushBadge } from "@/lib/native";
 import type { User, UserRole } from "@/lib/types";
 import { isAxiosError } from "axios";
 
@@ -62,9 +64,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         fullUser = await usersService.getUserById(id);
       } catch (innerErr) {
-        // getUserById can fail for transient reasons (rate-limit, 5xx,
-        // caching). Do NOT log the user out on this path â we still
-        // have a valid profile from /auth/me.
         console.warn("getUserById failed, using profile fallback", innerErr);
       }
 
@@ -72,12 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("user", JSON.stringify(fullUser));
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
-      // Only clear auth on explicit auth failures.
       if (status === 401 || status === 403) {
         clearAuth();
         setUser(null);
       } else {
-        // Transient failure â keep whatever user we already have cached.
         console.warn("refreshUser transient failure, keeping cached user", err);
       }
     } finally {
@@ -102,8 +99,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [refreshUser]);
 
-  // Listen for the api-client's hard-eviction event so we don't have to
-  // hard-reload the page to log a user out when the refresh endpoint 401s.
   useEffect(() => {
     const onExpired = () => {
       clearAuth();
@@ -112,6 +107,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener("auth:expired", onExpired);
     return () => window.removeEventListener("auth:expired", onExpired);
   }, []);
+
+  // Register for push notifications once per native session, after login.
+  // Web sessions are a no-op.
+  const pushRegistered = useRef(false);
+  useEffect(() => {
+    if (!user || pushRegistered.current || !isNative()) return;
+    pushRegistered.current = true;
+    void (async () => {
+      try {
+        const reg = await registerPush();
+        if (reg?.token) {
+          await pushService.registerToken({
+            token: reg.token,
+            platform: reg.platform,
+          });
+        }
+        await clearPushBadge();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn("[push] registration flow failed:", err);
+      }
+    })();
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
@@ -141,7 +159,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const switchRole = useCallback(
     (target: "client" | "contractor") => {
       if (!user) return;
-      // Optimistic local flip; backend role is unchanged â this is just a view mode.
       const next = { ...user, activeView: target };
       setUser(next);
       localStorage.setItem("user", JSON.stringify(next));

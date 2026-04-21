@@ -146,13 +146,21 @@ export default function ContractorEditProfile() {
   const TICKET_CATEGORY_KEYS = Object.keys(TICKETS_BY_CATEGORY);
   const INSURANCE_OPTIONS = isUS ? US_INSURANCE : AU_INSURANCE;
 
-  const _initialTrades: string[] = (user as any)?.trades || (user?.trade ? [user.trade] : []);
-  const _initialRatesRaw = ((user as any)?.tradeRates || {}) as Record<string, number>;
+  const _rawInitialTrades: string[] = (user as any)?.trades || (user?.trade ? [user.trade] : []);
+  const _legacyRatesRaw = ((user as any)?.tradeRates || {}) as Record<string, number>;
+  const _initialTrades: string[] = [];
   const _initialTradeRates: Record<string, number> = {};
-  for (const _t of _initialTrades) {
-    const _r = _initialRatesRaw[_t];
-    if (typeof _r === "number") _initialTradeRates[_t] = _r;
-    else if (user?.hourlyRate) _initialTradeRates[_t] = Number(user.hourlyRate);
+  for (const _raw of _rawInitialTrades) {
+    const _m = String(_raw).match(/^(.*?)@@(\d+(?:\.\d+)?)$/);
+    const _plain = _m ? _m[1] : String(_raw);
+    _initialTrades.push(_plain);
+    if (_m) {
+      _initialTradeRates[_plain] = Number(_m[2]);
+    } else if (typeof _legacyRatesRaw[_plain] === "number") {
+      _initialTradeRates[_plain] = _legacyRatesRaw[_plain];
+    } else if (user?.hourlyRate) {
+      _initialTradeRates[_plain] = Number(user.hourlyRate);
+    }
   }
 
   const [form, setForm] = useState({
@@ -275,13 +283,16 @@ export default function ContractorEditProfile() {
       const primaryTrade = form.trades[0]?.split(" > ").pop() || form.trades[0] || "";
       const _rateVals = Object.values(form.tradeRates).filter((r) => typeof r === "number" && r > 0) as number[];
       const _derivedHourlyRate = _rateVals.length > 0 ? Math.min(..._rateVals) : (form.hourlyRate ? Number(form.hourlyRate) : undefined);
+      const _encodedTrades = form.trades.map((t) => {
+        const r = form.tradeRates[t];
+        return typeof r === "number" && r > 0 ? `${t}@@${r}` : t;
+      });
       await updateProfile.mutateAsync({
         id: userId,
         data: {
           name: form.name,
           trade: primaryTrade,
-          trades: form.trades,
-          tradeRates: form.tradeRates,
+          trades: _encodedTrades,
           abn: form.abn.replace(/\D/g, ""),
           location: form.location,
           hourlyRate: _derivedHourlyRate,

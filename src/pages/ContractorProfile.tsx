@@ -75,9 +75,16 @@ export default function ContractorProfile() {
   const avatarUrl = contractor.profileImage?.url || contractor.avatar ||
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${contractor.name}`;
   const currencyPrefix = c.market === "US" ? "USD $" : "AUD $";
-  const trades: string[] = c.trades?.length > 0
+  const _rawTrades: string[] = c.trades?.length > 0
     ? c.trades
     : contractor.trade ? [contractor.trade] : [];
+  const tradesWithRates = _rawTrades.map((raw) => {
+    const m = String(raw).match(/^(.*?)@@(\d+(?:\.\d+)?)$/);
+    return m
+      ? { name: m[1], rate: Number(m[2]) as number | undefined }
+      : { name: String(raw), rate: undefined as number | undefined };
+  });
+  const trades: string[] = tradesWithRates.map((t) => t.name);
   const tickets: TicketEntry[] = Array.isArray(c.tickets) ? c.tickets : [];
   const insurance: string[] = Array.isArray(c.insurance) ? c.insurance : [];
   const availableDays: string[] = Array.isArray(c.availableDays) ? c.availableDays : [];
@@ -102,13 +109,21 @@ export default function ContractorProfile() {
               </div>
 
               {/* Trades */}
-              {trades.length > 0 && (
+              {tradesWithRates.length > 0 && (
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {trades.map((t) => (
-                    <span key={t} className="rounded-full bg-primary/10 text-primary text-sm font-medium px-3 py-0.5">
-                      {t.includes(" > ") ? t.split(" > ").pop() : t}
-                    </span>
-                  ))}
+                  {tradesWithRates.map((t) => {
+                    const displayName = t.name.includes(" > ") ? t.name.split(" > ").pop() : t.name;
+                    return (
+                      <span key={t.name} className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium px-3 py-0.5">
+                        <span>{displayName}</span>
+                        {typeof t.rate === "number" && (
+                          <span className="rounded-full bg-primary/20 px-2 text-xs font-semibold">
+                            {currencyPrefix}{t.rate}/hr
+                          </span>
+                        )}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
 

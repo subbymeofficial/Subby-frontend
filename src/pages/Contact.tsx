@@ -146,7 +146,7 @@ export default function Contact() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-semibold text-foreground">{item.label}</h3>
-                  <span className="block text-primary underline underline-offset-2 break-all">{item.email}</span>
+                  <span className="block text-sm text-primary underline underline-offset-2 break-all">{item.email}</span>
                 </div>
               </a>
             ))}

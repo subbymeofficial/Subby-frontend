@@ -144,9 +144,9 @@ export default function Contact() {
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <item.icon size={24} />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <h3 className="font-semibold text-foreground">{item.label}</h3>
-                  <span className="text-primary underline underline-offset-2">{item.email}</span>
+                  <span className="block text-primary underline underline-offset-2 break-all">{item.email}</span>
                 </div>
               </a>
             ))}

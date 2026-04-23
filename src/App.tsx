@@ -74,20 +74,27 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                {/* Public */}
+                {/* Public — auth gateway + sign-up path only.
+                    Rule: no one can reach platform content without signing up.
+                    Privacy/Terms stay public because Apple/Google require working
+                    public URLs during app review; they contain only legal text,
+                    not platform data. Payment return URLs stay public because
+                    Stripe redirects here without a session. */}
                 <Route path="/" element={<Index />} />
-                <Route path="/contractors" element={<Contractors />} />
-                <Route path="/contractors/:id" element={<ContractorProfile />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/payment/success" element={<PaymentSuccess />} />
-              <Route path="/become-subcontractor" element={<ProtectedRoute><BecomeSubcontractor /></ProtectedRoute>} />
                 <Route path="/payment/cancel" element={<PaymentCancel />} />
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/contact" element={<Contact />} />
+
+                {/* Gated — require sign-in */}
+                <Route path="/contractors" element={<ProtectedRoute><Contractors /></ProtectedRoute>} />
+                <Route path="/contractors/:id" element={<ProtectedRoute><ContractorProfile /></ProtectedRoute>} />
+                <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+                <Route path="/become-subcontractor" element={<ProtectedRoute><BecomeSubcontractor /></ProtectedRoute>} />
                 <Route path="/messages" element={<ProtectedRoute allowedRoles={["client", "contractor"]}><Messages /></ProtectedRoute>} />
 
                 {/* Client Dashboard */}

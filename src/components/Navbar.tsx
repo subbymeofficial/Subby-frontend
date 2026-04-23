@@ -29,7 +29,11 @@ export function Navbar() {
   const location = useLocation();
   const dashboardPath =
     user?.role === "admin" ? "/admin" : `/dashboard/${user?.role}`;
-  const navLinks = buildNavLinks(user?.role);
+  // Platform nav (Home / Find Contractors / Find Jobs / Contact) is only shown
+  // to authenticated members. Unauth visitors see just logo + Log In / Sign Up.
+  // This enforces the walled-garden rule: nothing about the platform is
+  // discoverable without an account.
+  const navLinks = isAuthenticated ? buildNavLinks(user?.role) : [];
 
   return (
     <header className="sticky top-0 z-40 border-b bg-[#D6E8FF] backdrop-blur">
